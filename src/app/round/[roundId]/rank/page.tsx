@@ -116,7 +116,7 @@ export default function RankPage() {
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center">
           <h1 className="text-xl font-bold text-gray-900">{round.prompt}</h1>
-          <p className="text-sm text-gray-500 mt-1">Rank these from your favorite to least favorite.</p>
+          <p className="text-sm text-gray-500 mt-1">Your next choices matter. Rank sincerely.</p>
         </div>
 
         {error && <p className="text-sm text-red-600 text-center">{error}</p>}

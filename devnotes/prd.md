@@ -209,51 +209,183 @@ avoid
 
 ---
 
-## lets start building: build plan + first sprint backlog
+## v0.0.1 release — what ships now
 
-### architecture (simple, fast to ship)
+### release summary
 
-* frontend: next.js (app router), tailwind
-* backend: supabase (postgres + realtime) or a small node server with websockets (either works, supabase is faster to ship)
-* realtime: supabase realtime channels (round state, participant list, submission count, reveal payload)
-* hosting: vercel (or similar)
+v0.0.1 is the functional foundation. the full host-to-player loop works end to end: create a round, share a code, rank options, reveal the group's choice. no accounts, no realtime, no animations. this is the "ship today" prototype from the PRD, done properly.
 
-### sprint 1 (foundation)
+### what's in v0.0.1
 
-1. data schema + api endpoints
+**host flow — complete**
 
-* create round
-* join round
-* submit ranking
-* close round
-* compute result payload
+* create round with prompt, description, options list (add/remove/reorder)
+* settings toggles: allow ties, anonymous mode
+* 6-character join code + QR code generation
+* live lobby with player list (or count-only in anonymous mode)
+* submission progress bar during ranking phase
+* start ranking / close ranking / reveal result controls
+* "run it again" button that pre-populates prompt + options for a new round
 
-2. core UI (no delight yet)
+**player flow — complete**
 
-* home, host create, lobby, player rank, reveal (static)
+* join via code (with ?code=X prefill from QR/link)
+* enter display name
+* drag-and-drop ranking with @dnd-kit (mobile + desktop)
+* "lock in my ranking" submit
+* waiting screen with spinner, auto-redirects on reveal
+* result view: winner card, elimination table, summary text
 
-3. processing engine (deterministic)
+**processing engine — complete**
 
-* implement rounds-based convergence algorithm + tie-break rules
-* return a “result story” json payload the UI can animate
+* instant-runoff convergence algorithm (pure functions, zero side effects)
+* 3-tier tie-breaking: next-preference strength → total mentions → seeded SHA-256 coinflip
+* deterministic: same seed always produces same result
+* plain-language 2-3 sentence summary generator
+* 14 unit tests passing (majority wins, multi-round, exhausted ballots, all tie-break tiers)
 
-### sprint 2 (real-time + delight)
+**data layer — complete**
 
-* realtime updates in lobby (joiners, submitted count)
-* realtime switch: “ranking started” and “reveal now”
-* reveal animation using the result payload
-* shareable result card image
+* supabase postgres: rounds, participants, rankings, results tables
+* 11 API route handlers covering full lifecycle
+* host identity via UUID token in localStorage + X-Host-Token header
+* participant identity via localStorage
 
-### sprint 3 (polish + safety)
+**infrastructure — complete**
 
-* moderation tools (remove participant/option)
-* profanity filter
-* post-round pulse question
-* basic analytics events
+* next.js 16 (app router), typescript, tailwind css v4
+* supabase browser + server clients
+* jest + ts-jest for testing
+* builds clean, deploys to vercel
+
+### what's NOT in v0.0.1 (deferred to later sprints)
+
+**deferred from v1 scope to sprint 2:**
+
+* realtime updates (currently polling every 3s — works, not instant)
+* reveal animation (currently static table — functional, not delightful)
+* shareable result card image export
+* countdown to reveal (3…2…1)
+* drag sounds and haptics
+
+**deferred from v1 scope to sprint 3:**
+
+* host remove option
+* host remove player (db field exists, no UI/API)
+* profanity filter for names/options
+* random fun name generator for players
+* timer for ranking phase
+* max ranks setting (UI toggle, db field, enforcement)
+* analytics events and instrumentation
+* "felt fair" post-round pulse question
+
+### architecture decisions (v0.0.1)
+
+* **no accounts** — host identity via UUID token in localStorage, verified server-side
+* **no RLS** — access control at API route layer via host token verification
+* **no realtime** — polling every 3s for participant list, submission count, round status
+* **options as jsonb** — string array on rounds table, immutable once ranking starts
+* **rankings as jsonb** — ordered string array per participant, readable and simple
+* **engine is pure** — takes rankings in, returns result out, fully testable, no db dependency
+
+### v0.0.1 acceptance criteria status
+
+* [x] host can create a round with 2+ options and share a join code
+* [x] players can join on mobile, rank options, submit, and see confirmation
+* [x] host can close ranking and reveal a deterministic single group choice
+* [x] results view shows round-by-round explanation and is understandable
+* [x] tie-breaks are handled transparently and consistently (3-tier system)
+* [x] session can be replayed with pre-populated prompt/options ("run it again")
+* [x] copy rules followed: no "vote", "election", "candidate" in UI text
+* [x] anonymous mode hides player names in lobby (shows count only)
+
+### file structure (v0.0.1)
+
+```
+src/
+  app/
+    page.tsx                           # home
+    globals.css
+    layout.tsx
+    host/create/page.tsx               # host create
+    host/[roundId]/lobby/page.tsx      # host lobby
+    host/[roundId]/reveal/page.tsx     # host reveal
+    join/page.tsx                      # player join
+    round/[roundId]/rank/page.tsx      # player rank
+    round/[roundId]/waiting/page.tsx   # player waiting
+    round/[roundId]/reveal/page.tsx    # player reveal
+    api/rounds/route.ts                # POST create round
+    api/rounds/lookup/route.ts         # GET find by code
+    api/rounds/join/route.ts           # POST join round
+    api/rounds/[roundId]/route.ts      # GET round details
+    api/rounds/[roundId]/participants/ # GET list players
+    api/rounds/[roundId]/start/        # POST start ranking
+    api/rounds/[roundId]/rankings/     # POST submit, GET count
+    api/rounds/[roundId]/close/        # POST close ranking
+    api/rounds/[roundId]/reveal/       # POST run engine
+    api/rounds/[roundId]/result/       # GET result
+  components/
+    ui/Button.tsx, Input.tsx, Toggle.tsx, Card.tsx, Badge.tsx
+    OptionEditor.tsx
+    DraggableRankList.tsx
+    JoinCodeDisplay.tsx
+    PlayerList.tsx
+    SubmissionCounter.tsx
+    WinnerCard.tsx
+    EliminationTable.tsx
+    ResultSummary.tsx
+  lib/
+    supabase/client.ts, server.ts
+    engine/converge.ts, tiebreak.ts, summarize.ts, types.ts
+    engine/__tests__/converge.test.ts
+    host-token.ts
+  types/
+    database.ts, round.ts
+supabase/
+  schema.sql                           # run in supabase SQL editor
+```
 
 ---
 
-## a concrete “result payload” shape (so the UI can animate it)
+## sprint roadmap
+
+### sprint 1 — foundation (v0.0.1) ✓
+
+* data schema + API endpoints
+* core UI (all pages, no delight)
+* processing engine (deterministic, tested)
+* polling-based updates
+
+### sprint 2 — realtime + delight
+
+* supabase realtime channels (replace polling)
+* reveal animation using result payload
+* countdown to reveal (3…2…1)
+* shareable result card image
+* drag sounds / haptics (mobile)
+
+### sprint 3 — polish + safety
+
+* moderation tools (remove participant/option)
+* profanity filter
+* timer for ranking phase
+* max ranks setting
+* random fun name generator
+* post-round pulse question ("felt fair?")
+* basic analytics events
+
+### sprint 4+ — growth
+
+* accounts, teams, saved prompt libraries
+* "discussion then revote" mode
+* integrations (slack, zoom)
+* multi-winner / proportional modes
+
+---
+
+## result payload shape
+
+the engine returns this structure. the reveal UI reads it directly.
 
 ```json
 {
@@ -262,8 +394,8 @@ avoid
   "total_active": 20,
   "rounds": [
     {
-      "round_index": 1,
-      "counts": { "tacos": 7, "thai": 6, "pizza": 4, "bbq": 3 },
+      "round_number": 1,
+      "tallies": { "tacos": 7, "thai": 6, "pizza": 4, "bbq": 3 },
       "eliminated": "bbq",
       "transfers": [
         { "from": "bbq", "to": "tacos", "count": 1 },
@@ -271,8 +403,8 @@ avoid
       ]
     },
     {
-      "round_index": 2,
-      "counts": { "tacos": 8, "thai": 8, "pizza": 4 },
+      "round_number": 2,
+      "tallies": { "tacos": 8, "thai": 8, "pizza": 4 },
       "eliminated": "pizza",
       "transfers": [
         { "from": "pizza", "to": "tacos", "count": 2 },
@@ -280,33 +412,19 @@ avoid
       ]
     },
     {
-      "round_index": 3,
-      "counts": { "tacos": 10, "thai": 10 },
+      "round_number": 3,
+      "tallies": { "tacos": 11, "thai": 9 },
       "eliminated": null,
-      "transfers": [],
-      "tie_break": {
-        "type": "seeded_coinflip",
-        "seed": "round_abc123",
-        "winner": "tacos"
-      }
+      "transfers": []
     }
   ],
-  "summary": [
-    "support concentrated around tacos and thai as people’s top two preferences.",
-    "when bbq and pizza dropped out, their support flowed mostly into those two, creating a head-to-head finish."
-  ]
+  "tie_breaks": [],
+  "summary": {
+    "text": "After 3 rounds of elimination, tacos emerged as the group's choice with 55% support.",
+    "total_rounds": 3,
+    "winner": "tacos",
+    "runner_up": "thai",
+    "winning_percentage": 55
+  }
 }
 ```
-
----
-
-## if you want a “ship today” minimal prototype
-
-* no accounts
-* no realtime, just refresh polling
-* host presses “compute” and shares a results link
-* still teaches the experience of ranking more than one option and seeing convergence
-
----
-
-if you tell me what stack you want for v1 (supabase realtime vs custom websocket server), i’ll turn this into an implementation-ready spec: endpoints, table definitions, security rules, and a page-by-page component breakdown so your dev can start cutting code immediately.

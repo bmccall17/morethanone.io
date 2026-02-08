@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
@@ -9,11 +9,20 @@ import Toggle from '@/components/ui/Toggle'
 import OptionEditor from '@/components/OptionEditor'
 import { saveHostToken } from '@/lib/host-token'
 
-export default function CreateRound() {
+function CreateRoundForm() {
   const router = useRouter()
-  const [prompt, setPrompt] = useState('')
-  const [description, setDescription] = useState('')
-  const [options, setOptions] = useState<string[]>([])
+  const searchParams = useSearchParams()
+
+  const prefillPrompt = searchParams.get('prompt') || ''
+  const prefillDescription = searchParams.get('description') || ''
+  const prefillOptions = (() => {
+    try { return JSON.parse(searchParams.get('options') || '[]') }
+    catch { return [] }
+  })()
+
+  const [prompt, setPrompt] = useState(prefillPrompt)
+  const [description, setDescription] = useState(prefillDescription)
+  const [options, setOptions] = useState<string[]>(prefillOptions)
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -101,7 +110,7 @@ export default function CreateRound() {
             />
             <Toggle
               label="Anonymous results"
-              description="Don't show who voted for what"
+              description="Hide participant names from results"
               checked={anonymousResults}
               onChange={setAnonymousResults}
             />
@@ -123,5 +132,17 @@ export default function CreateRound() {
         </Button>
       </div>
     </main>
+  )
+}
+
+export default function CreateRound() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </main>
+    }>
+      <CreateRoundForm />
+    </Suspense>
   )
 }

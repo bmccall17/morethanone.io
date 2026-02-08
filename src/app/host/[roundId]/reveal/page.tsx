@@ -30,7 +30,7 @@ export default function HostReveal() {
   const roundId = params.roundId as string
 
   const [result, setResult] = useState<ResultData | null>(null)
-  const [round, setRound] = useState<{ prompt: string } | null>(null)
+  const [round, setRound] = useState<{ prompt: string; options: string[]; description: string | null } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -94,7 +94,15 @@ export default function HostReveal() {
         <Button
           size="lg"
           className="w-full"
-          onClick={() => router.push('/host/create')}
+          onClick={() => {
+            const params = new URLSearchParams()
+            if (round) {
+              params.set('prompt', round.prompt)
+              if (round.description) params.set('description', round.description)
+              params.set('options', JSON.stringify(round.options))
+            }
+            router.push(`/host/create?${params.toString()}`)
+          }}
         >
           Run it again
         </Button>

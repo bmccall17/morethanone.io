@@ -17,11 +17,11 @@ export function generateSummary(input: SummaryInput): string {
   // Opening sentence
   if (totalRounds === 1) {
     parts.push(
-      `${winner} won outright in the first round with ${winningPercentage}% of the ${totalActive} vote${totalActive === 1 ? '' : 's'}.`
+      `${winner} won outright in the first round with ${winningPercentage}% support from ${totalActive} participant${totalActive === 1 ? '' : 's'}.`
     )
   } else {
     parts.push(
-      `After ${totalRounds} round${totalRounds === 1 ? '' : 's'} of elimination, ${winner} emerged as the group's choice with ${winningPercentage}% of the vote.`
+      `After ${totalRounds} round${totalRounds === 1 ? '' : 's'} of elimination, ${winner} emerged as the group's choice with ${winningPercentage}% support.`
     )
   }
 

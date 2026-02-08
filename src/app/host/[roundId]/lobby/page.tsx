@@ -16,6 +16,7 @@ interface RoundData {
   prompt: string
   description: string | null
   options: string[]
+  settings: { allowTies: boolean; anonymousResults: boolean }
   status: string
 }
 
@@ -201,7 +202,14 @@ export default function HostLobby() {
         )}
 
         <Card>
-          <PlayerList players={players} />
+          {round.settings?.anonymousResults ? (
+            <div className="text-center py-4">
+              <p className="text-2xl font-bold text-gray-900">{players.length}</p>
+              <p className="text-sm text-gray-500">participant{players.length !== 1 ? 's' : ''} joined</p>
+            </div>
+          ) : (
+            <PlayerList players={players} />
+          )}
         </Card>
 
         {(round.status === 'ranking' || round.status === 'closed') && (
