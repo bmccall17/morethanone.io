@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import DraggableRankList from '@/components/DraggableRankList'
 import { getParticipantId } from '@/lib/host-token'
+import { subscribeToRound } from '@/lib/realtime'
 
 export default function RankPage() {
   const params = useParams()
@@ -18,29 +19,34 @@ export default function RankPage() {
 
   const participantId = typeof window !== 'undefined' ? getParticipantId(roundId) : null
 
-  const fetchRound = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/rounds/${roundId}`)
-      if (res.ok) {
-        const data = await res.json()
-        setRound(data)
-        if (data.status === 'revealed') {
-          router.push(`/round/${roundId}/reveal`)
+  useEffect(() => {
+    async function fetchRound() {
+      try {
+        const res = await fetch(`/api/rounds/${roundId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRound(data)
+          if (data.status === 'revealed') {
+            router.push(`/round/${roundId}/reveal`)
+          }
         }
-      }
-    } catch { /* ignore */ }
-    setLoading(false)
+      } catch { /* ignore */ }
+      setLoading(false)
+    }
+    fetchRound()
   }, [roundId, router])
 
+  // Realtime subscription for round status changes
   useEffect(() => {
-    fetchRound()
-  }, [fetchRound])
-
-  // Poll for status changes
-  useEffect(() => {
-    const interval = setInterval(fetchRound, 3000)
-    return () => clearInterval(interval)
-  }, [fetchRound])
+    return subscribeToRound(roundId, {
+      onStatusChange: (status) => {
+        setRound((prev) => (prev ? { ...prev, status } : prev))
+        if (status === 'revealed') {
+          router.push(`/round/${roundId}/reveal`)
+        }
+      },
+    })
+  }, [roundId, router])
 
   async function handleSubmit(ranking: string[]) {
     if (!participantId) {
