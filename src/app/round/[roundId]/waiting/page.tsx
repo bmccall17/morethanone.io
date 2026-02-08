@@ -1,31 +1,24 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
+import { subscribeToRound } from '@/lib/realtime'
 
 export default function WaitingPage() {
   const params = useParams()
   const router = useRouter()
   const roundId = params.roundId as string
 
-  const checkStatus = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/rounds/${roundId}`)
-      if (res.ok) {
-        const data = await res.json()
-        if (data.status === 'revealed') {
+  useEffect(() => {
+    return subscribeToRound(roundId, {
+      onStatusChange: (status) => {
+        if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
         }
-      }
-    } catch { /* ignore */ }
+      },
+    })
   }, [roundId, router])
-
-  useEffect(() => {
-    checkStatus()
-    const interval = setInterval(checkStatus, 3000)
-    return () => clearInterval(interval)
-  }, [checkStatus])
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4">
