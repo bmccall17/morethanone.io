@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -9,7 +9,7 @@ import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import SubmissionCounter from '@/components/SubmissionCounter'
 import { getHostToken, getHostHeaders } from '@/lib/host-token'
-import { subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
+import { subscribeToRound, subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
 
 interface RoundData {
   id: string
@@ -40,35 +40,26 @@ export default function HostLobby() {
 
   const hostToken = typeof window !== 'undefined' ? getHostToken(roundId) : null
 
-  const fetchRound = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/rounds/${roundId}`)
-      if (res.ok) {
-        const data = await res.json()
+  useEffect(() => {
+    async function init() {
+      const [roundRes, playersRes] = await Promise.allSettled([
+        fetch(`/api/rounds/${roundId}`),
+        fetch(`/api/rounds/${roundId}/participants`),
+      ])
+      if (roundRes.status === 'fulfilled' && roundRes.value.ok) {
+        const data = await roundRes.value.json()
         setRound(data)
         if (data.status === 'revealed') {
           router.push(`/host/${roundId}/reveal`)
         }
       }
-    } catch { /* ignore polling errors */ }
-  }, [roundId, router])
-
-  const fetchPlayers = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/rounds/${roundId}/participants`)
-      if (res.ok) {
-        setPlayers(await res.json())
+      if (playersRes.status === 'fulfilled' && playersRes.value.ok) {
+        setPlayers(await playersRes.value.json())
       }
-    } catch { /* ignore */ }
-  }, [roundId])
-
-  useEffect(() => {
-    async function init() {
-      await Promise.all([fetchRound(), fetchPlayers()])
       setLoading(false)
     }
     init()
-  }, [fetchRound, fetchPlayers])
+  }, [roundId, router])
 
   // Realtime subscription for participants
   useEffect(() => {
@@ -104,13 +95,17 @@ export default function HostLobby() {
     })
   }, [roundId, round?.status])
 
-  // Poll round status
+  // Realtime subscription for round status changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchRound()
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [fetchRound])
+    return subscribeToRound(roundId, {
+      onStatusChange: (status) => {
+        setRound((prev) => (prev ? { ...prev, status } : prev))
+        if (status === 'revealed') {
+          router.push(`/host/${roundId}/reveal`)
+        }
+      },
+    })
+  }, [roundId, router])
 
   async function handleStart() {
     setActionLoading(true)
@@ -124,7 +119,6 @@ export default function HostLobby() {
         const data = await res.json()
         throw new Error(data.error)
       }
-      await fetchRound()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {
@@ -144,7 +138,6 @@ export default function HostLobby() {
         const data = await res.json()
         throw new Error(data.error)
       }
-      await fetchRound()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {
