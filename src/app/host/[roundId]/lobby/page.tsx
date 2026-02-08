@@ -9,6 +9,7 @@ import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import SubmissionCounter from '@/components/SubmissionCounter'
 import { getHostToken, getHostHeaders } from '@/lib/host-token'
+import { subscribeToParticipants } from '@/lib/realtime'
 
 interface RoundData {
   id: string
@@ -79,17 +80,28 @@ export default function HostLobby() {
     init()
   }, [fetchRound, fetchPlayers])
 
-  // Poll every 3 seconds
+  // Realtime subscription for participants
+  useEffect(() => {
+    return subscribeToParticipants(roundId, {
+      onPlayerJoined: (participant) => {
+        setPlayers((prev) => {
+          if (prev.some((p) => p.id === participant.id)) return prev
+          return [...prev, { id: participant.id, display_name: participant.display_name }]
+        })
+      },
+    })
+  }, [roundId])
+
+  // Poll round status and submissions
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchPlayers()
       fetchRound()
       if (round?.status === 'ranking' || round?.status === 'closed') {
         fetchSubmissions()
       }
     }, 3000)
     return () => clearInterval(interval)
-  }, [fetchPlayers, fetchRound, fetchSubmissions, round?.status])
+  }, [fetchRound, fetchSubmissions, round?.status])
 
   async function handleStart() {
     setActionLoading(true)
