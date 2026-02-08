@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import type { Participant } from '@/types/database'
+import type { Participant, Ranking } from '@/types/database'
 
 export interface RoundCallbacks {
   onStatusChange: (status: string) => void
@@ -8,6 +8,10 @@ export interface RoundCallbacks {
 
 export interface ParticipantCallbacks {
   onPlayerJoined: (participant: Participant) => void
+}
+
+export interface RankingCallbacks {
+  onRankingSubmitted: (ranking: Ranking) => void
 }
 
 export function subscribeToRound(
@@ -59,6 +63,45 @@ export function subscribeToParticipants(
       },
       (payload) => {
         callbacks.onPlayerJoined(payload.new as Participant)
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}
+
+export function subscribeToRankings(
+  roundId: string,
+  callbacks: RankingCallbacks
+): () => void {
+  const supabase = createClient()
+
+  const channel: RealtimeChannel = supabase
+    .channel(`rankings:${roundId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'rankings',
+        filter: `round_id=eq.${roundId}`,
+      },
+      (payload) => {
+        callbacks.onRankingSubmitted(payload.new as Ranking)
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'rankings',
+        filter: `round_id=eq.${roundId}`,
+      },
+      (payload) => {
+        callbacks.onRankingSubmitted(payload.new as Ranking)
       }
     )
     .subscribe()
