@@ -9,7 +9,7 @@ import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import SubmissionCounter from '@/components/SubmissionCounter'
 import { getHostToken, getHostHeaders } from '@/lib/host-token'
-import { subscribeToParticipants } from '@/lib/realtime'
+import { subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
 
 interface RoundData {
   id: string
@@ -62,16 +62,6 @@ export default function HostLobby() {
     } catch { /* ignore */ }
   }, [roundId])
 
-  const fetchSubmissions = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/rounds/${roundId}/rankings`)
-      if (res.ok) {
-        const data = await res.json()
-        setSubmissionCount(data.count)
-      }
-    } catch { /* ignore */ }
-  }, [roundId])
-
   useEffect(() => {
     async function init() {
       await Promise.all([fetchRound(), fetchPlayers()])
@@ -92,16 +82,35 @@ export default function HostLobby() {
     })
   }, [roundId])
 
-  // Poll round status and submissions
+  // Realtime subscription for rankings: fetch initial count then increment on each submission
+  useEffect(() => {
+    if (round?.status !== 'ranking' && round?.status !== 'closed') return
+
+    async function fetchInitialCount() {
+      try {
+        const res = await fetch(`/api/rounds/${roundId}/rankings`)
+        if (res.ok) {
+          const data = await res.json()
+          setSubmissionCount(data.count)
+        }
+      } catch { /* ignore */ }
+    }
+    fetchInitialCount()
+
+    return subscribeToRankings(roundId, {
+      onRankingSubmitted: () => {
+        setSubmissionCount((prev) => prev + 1)
+      },
+    })
+  }, [roundId, round?.status])
+
+  // Poll round status
   useEffect(() => {
     const interval = setInterval(() => {
       fetchRound()
-      if (round?.status === 'ranking' || round?.status === 'closed') {
-        fetchSubmissions()
-      }
     }, 3000)
     return () => clearInterval(interval)
-  }, [fetchRound, fetchSubmissions, round?.status])
+  }, [fetchRound])
 
   async function handleStart() {
     setActionLoading(true)
