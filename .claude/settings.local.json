@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ralphy:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx next build:*)",
+      "Bash(lsof:*)"
+    ]
+  }
+}
