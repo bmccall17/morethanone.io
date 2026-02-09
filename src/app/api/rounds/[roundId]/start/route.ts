@@ -17,7 +17,7 @@ export async function POST(
   // Verify host
   const { data: round, error: roundError } = await supabase
     .from('rounds')
-    .select('id, status, host_token')
+    .select('id, status, host_token, settings')
     .eq('id', roundId)
     .single()
 
@@ -33,6 +33,25 @@ export async function POST(
     return NextResponse.json({ error: 'Round has already started' }, { status: 400 })
   }
 
+  // If host_as_participant is enabled, create a participant record for the host
+  let hostParticipantId: string | null = null
+  if (round.settings?.host_as_participant) {
+    const { data: participant, error: participantError } = await supabase
+      .from('participants')
+      .insert({
+        round_id: roundId,
+        display_name: 'Host',
+      })
+      .select('id')
+      .single()
+
+    if (participantError) {
+      return NextResponse.json({ error: participantError.message }, { status: 500 })
+    }
+
+    hostParticipantId = participant.id
+  }
+
   const { error: updateError } = await supabase
     .from('rounds')
     .update({ status: 'ranking' })
@@ -42,5 +61,8 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  return NextResponse.json({ status: 'ranking' })
+  return NextResponse.json({
+    status: 'ranking',
+    ...(hostParticipantId && { hostParticipantId }),
+  })
 }

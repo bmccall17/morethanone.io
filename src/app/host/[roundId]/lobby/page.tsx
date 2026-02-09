@@ -9,7 +9,7 @@ import Toggle from '@/components/ui/Toggle'
 import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import SubmissionCounter from '@/components/SubmissionCounter'
-import { getHostToken, getHostHeaders } from '@/lib/host-token'
+import { getHostToken, getHostHeaders, saveParticipantId } from '@/lib/host-token'
 import { subscribeToRound, subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
 
 interface RoundData {
@@ -119,6 +119,10 @@ export default function HostLobby() {
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error)
+      }
+      const data = await res.json()
+      if (data.hostParticipantId) {
+        saveParticipantId(roundId, data.hostParticipantId)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
