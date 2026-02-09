@@ -8,8 +8,9 @@ import Badge from '@/components/ui/Badge'
 import Toggle from '@/components/ui/Toggle'
 import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
+import DraggableRankList from '@/components/DraggableRankList'
 import SubmissionCounter from '@/components/SubmissionCounter'
-import { getHostToken, getHostHeaders, saveParticipantId } from '@/lib/host-token'
+import { getHostToken, getHostHeaders, saveParticipantId, getParticipantId } from '@/lib/host-token'
 import { subscribeToRound, subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
 
 interface RoundData {
@@ -37,6 +38,8 @@ export default function HostLobby() {
   const [submissionCount, setSubmissionCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+  const [hostRankingSubmitted, setHostRankingSubmitted] = useState(false)
   const [error, setError] = useState('')
 
   const hostToken = typeof window !== 'undefined' ? getHostToken(roundId) : null
@@ -167,6 +170,32 @@ export default function HostLobby() {
     }
   }
 
+  async function handleHostSubmitRanking(ranking: string[]) {
+    const participantId = getParticipantId(roundId)
+    if (!participantId) {
+      setError('No participant ID found.')
+      return
+    }
+    setSubmitLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/rankings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participantId, ranking }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to submit ranking')
+      }
+      setHostRankingSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit ranking')
+    } finally {
+      setSubmitLoading(false)
+    }
+  }
+
   async function handleReveal() {
     setActionLoading(true)
     setError('')
@@ -247,6 +276,20 @@ export default function HostLobby() {
             <PlayerList players={players} />
           )}
         </Card>
+
+        {round.status === 'ranking' && round.settings?.host_as_participant && getParticipantId(roundId) && (
+          <Card>
+            {hostRankingSubmitted ? (
+              <p className="text-center text-green-600 font-medium py-2">Ranking submitted</p>
+            ) : (
+              <DraggableRankList
+                options={round.options}
+                onSubmit={handleHostSubmitRanking}
+                loading={submitLoading}
+              />
+            )}
+          </Card>
+        )}
 
         {(round.status === 'ranking' || round.status === 'closed') && (
           <Card>
