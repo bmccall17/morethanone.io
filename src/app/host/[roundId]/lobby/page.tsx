@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import Toggle from '@/components/ui/Toggle'
 import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import SubmissionCounter from '@/components/SubmissionCounter'
@@ -145,6 +146,23 @@ export default function HostLobby() {
     }
   }
 
+  async function handleToggleParticipate(checked: boolean) {
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/settings`, {
+        method: 'PATCH',
+        headers: { ...getHostHeaders(roundId), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host_as_participant: checked }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+      setRound((prev) => prev ? { ...prev, settings: { ...prev.settings, host_as_participant: checked } } : prev)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update setting')
+    }
+  }
+
   async function handleReveal() {
     setActionLoading(true)
     setError('')
@@ -231,6 +249,16 @@ export default function HostLobby() {
             <SubmissionCounter submitted={submissionCount} total={players.length} />
           </Card>
         )}
+
+        <Card>
+          <Toggle
+            label="Participate in this round"
+            description="Join as a participant and submit your own ranking"
+            checked={round.settings?.host_as_participant ?? false}
+            onChange={handleToggleParticipate}
+            disabled={round.status !== 'setup'}
+          />
+        </Card>
 
         {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
