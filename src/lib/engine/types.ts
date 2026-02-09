@@ -15,6 +15,9 @@ export interface ConvergeRound {
   tallies: Record<string, number>
   eliminated: string | null
   transfers: Transfer[]
+  active: number
+  inactive: number
+  threshold: number
 }
 
 export interface TieBreak {

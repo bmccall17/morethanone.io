@@ -5,11 +5,14 @@ import { generateSummary } from './summarize'
 /**
  * Run instant-runoff / ranked-choice convergence algorithm.
  *
- * 1. Count each ballot's top remaining choice
- * 2. If any option has > 50% of active ballots, it wins
- * 3. Otherwise, eliminate the option with fewest votes (tie-break if needed)
- * 4. Redistribute eliminated option's votes to next preferences
+ * 1. Count each ranking's top remaining choice
+ * 2. If any option has majority of active (non-exhausted) rankings, it wins
+ * 3. Otherwise, eliminate the option with fewest support (tie-break if needed)
+ * 4. Redistribute eliminated option's support to next preferences
  * 5. Repeat until a winner is found or only one option remains
+ *
+ * The majority threshold recalculates each round based on active rankings,
+ * shrinking as rankings exhaust post-redistribution.
  */
 export function converge(input: ConvergeInput): ConvergeResult {
   const { options, rankings, seed = 'default-seed' } = input
@@ -22,41 +25,50 @@ export function converge(input: ConvergeInput): ConvergeResult {
   }
 
   let activeOptions = new Set(options)
-  // Working copy of ballots — we filter out eliminated options as we go
+  // Working copy of rankings — we filter out eliminated options as we go
   let ballots = rankings.map(r => [...r])
   const rounds: ConvergeRound[] = []
   const tieBreaks: ConvergeResult['tie_breaks'] = []
-  const totalActive = rankings.length
-  const majorityThreshold = Math.floor(totalActive / 2) + 1
+  const totalSubmissions = rankings.length
 
   while (activeOptions.size > 1) {
-    // Remove eliminated options from all ballots
+    // Remove eliminated options from all rankings
     ballots = ballots.map(b => b.filter(opt => activeOptions.has(opt)))
 
-    // Count top choices
+    // Count top choices and track inactive (exhausted) rankings
     const tallies: Record<string, number> = {}
     for (const opt of activeOptions) {
       tallies[opt] = 0
     }
+    let inactive = 0
     for (const ballot of ballots) {
       if (ballot.length > 0) {
         tallies[ballot[0]]++
+      } else {
+        inactive++
       }
     }
 
+    // Per-round threshold based on active rankings
+    const active = totalSubmissions - inactive
+    const threshold = Math.floor(active / 2) + 1
+
     // Check for majority winner
     const topOption = Object.entries(tallies).sort((a, b) => b[1] - a[1])[0]
-    if (topOption && topOption[1] >= majorityThreshold) {
+    if (topOption && topOption[1] >= threshold) {
       rounds.push({
         round_number: rounds.length + 1,
         tallies: { ...tallies },
         eliminated: null,
         transfers: [],
+        active,
+        inactive,
+        threshold,
       })
       break
     }
 
-    // Find the option(s) with the fewest votes
+    // Find the option(s) with the fewest support
     const minVotes = Math.min(...Object.values(tallies))
     const lowestOptions = Object.keys(tallies).filter(k => tallies[k] === minVotes)
 
@@ -98,6 +110,9 @@ export function converge(input: ConvergeInput): ConvergeResult {
       tallies: { ...tallies },
       eliminated,
       transfers,
+      active,
+      inactive,
+      threshold,
     })
 
     activeOptions.delete(eliminated)
@@ -108,12 +123,25 @@ export function converge(input: ConvergeInput): ConvergeResult {
       ballots = ballots.map(b => b.filter(opt => activeOptions.has(opt)))
       const finalTallies: Record<string, number> = {}
       const lastOption = [...activeOptions][0]
-      finalTallies[lastOption] = ballots.filter(b => b.length > 0 && b[0] === lastOption).length
+      let finalInactive = 0
+      for (const ballot of ballots) {
+        if (ballot.length > 0 && ballot[0] === lastOption) {
+          finalTallies[lastOption] = (finalTallies[lastOption] || 0) + 1
+        } else if (ballot.length === 0) {
+          finalInactive++
+        }
+      }
+      if (!finalTallies[lastOption]) finalTallies[lastOption] = 0
+      const finalActive = totalSubmissions - finalInactive
+      const finalThreshold = Math.floor(finalActive / 2) + 1
       rounds.push({
         round_number: rounds.length + 1,
         tallies: finalTallies,
         eliminated: null,
         transfers: [],
+        active: finalActive,
+        inactive: finalInactive,
+        threshold: finalThreshold,
       })
       break
     }
@@ -126,6 +154,9 @@ export function converge(input: ConvergeInput): ConvergeResult {
       tallies: { [options[0]]: rankings.length },
       eliminated: null,
       transfers: [],
+      active: totalSubmissions,
+      inactive: 0,
+      threshold: Math.floor(totalSubmissions / 2) + 1,
     })
   }
 
@@ -133,7 +164,8 @@ export function converge(input: ConvergeInput): ConvergeResult {
   const lastRound = rounds[rounds.length - 1]
   const winner = Object.entries(lastRound.tallies).sort((a, b) => b[1] - a[1])[0][0]
   const winnerVotes = lastRound.tallies[winner]
-  const winningPercentage = totalActive > 0 ? Math.round((winnerVotes / totalActive) * 100) : 100
+  // Winning percentage is against active rankings in the final round (post-redistribution)
+  const winningPercentage = lastRound.active > 0 ? Math.round((winnerVotes / lastRound.active) * 100) : 100
 
   // Determine runner-up from the last round with an elimination, or from final tallies
   let runnerUp: string | null = null
@@ -154,7 +186,9 @@ export function converge(input: ConvergeInput): ConvergeResult {
     winner,
     runnerUp,
     totalRounds: rounds.length,
-    totalActive,
+    totalSubmissions,
+    activeInFinalRound: lastRound.active,
+    inactiveInFinalRound: lastRound.inactive,
     winningPercentage,
     tieBreaks,
   })
@@ -162,8 +196,8 @@ export function converge(input: ConvergeInput): ConvergeResult {
   return {
     winner,
     rounds,
-    majority_threshold: majorityThreshold,
-    total_active: totalActive,
+    majority_threshold: rounds[0].threshold,
+    total_active: totalSubmissions,
     tie_breaks: tieBreaks,
     summary: {
       text: summary,
