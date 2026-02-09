@@ -170,6 +170,23 @@ export default function HostLobby() {
     }
   }
 
+  async function handleToggleShowProcessing(checked: boolean) {
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/settings`, {
+        method: 'PATCH',
+        headers: { ...getHostHeaders(roundId), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ show_processing: checked }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+      setRound((prev) => prev ? { ...prev, settings: { ...prev.settings, show_processing: checked } } : prev)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update setting')
+    }
+  }
+
   async function handleHostSubmitRanking(ranking: string[]) {
     const participantId = getParticipantId(roundId)
     if (!participantId) {
@@ -303,6 +320,13 @@ export default function HostLobby() {
             description="Join as a participant and submit your own ranking"
             checked={round.settings?.host_as_participant ?? false}
             onChange={handleToggleParticipate}
+            disabled={round.status !== 'setup'}
+          />
+          <Toggle
+            label="Show live processing to participants"
+            description="Let participants see results as they are calculated"
+            checked={round.settings?.show_processing ?? false}
+            onChange={handleToggleShowProcessing}
             disabled={round.status !== 'setup'}
           />
         </Card>
