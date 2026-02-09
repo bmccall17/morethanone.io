@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "markdown:devnotes/sprint-2-backlog.md:27": {
+      "count": 1,
+      "last": "2026-02-08T22:28:42.774Z",
+      "title": "Create a `RevealAnimation` component at `src/components/RevealAnimation.tsx`. It receives the full result payload (ConvergeResult type from `src/lib/engine/types.ts`). It should animate through each elimination round sequentially: show a bar chart of current tallies, highlight the eliminated option, animate vote transfers to remaining options, then advance to the next round. Use CSS transitions/animations (Tailwind + inline styles). End by highlighting the winner. Include a \"Skip\" button that jumps to the final state."
+    }
+  }
+}
