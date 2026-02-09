@@ -1,24 +1,40 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import { subscribeToRound } from '@/lib/realtime'
+import type { RoundSettings } from '@/types/database'
 
 export default function WaitingPage() {
   const params = useParams()
   const router = useRouter()
   const roundId = params.roundId as string
+  const [showProcessing, setShowProcessing] = useState(false)
+
+  useEffect(() => {
+    async function fetchSettings() {
+      const res = await fetch(`/api/rounds/${roundId}`)
+      if (res.ok) {
+        const data = await res.json()
+        const settings = data.settings as RoundSettings
+        setShowProcessing(settings?.show_processing ?? false)
+      }
+    }
+    fetchSettings()
+  }, [roundId])
 
   useEffect(() => {
     return subscribeToRound(roundId, {
       onStatusChange: (status) => {
-        if (status === 'revealed') {
+        if (status === 'processing' && showProcessing) {
+          router.push(`/round/${roundId}/processing`)
+        } else if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
         }
       },
     })
-  }, [roundId, router])
+  }, [roundId, router, showProcessing])
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4">

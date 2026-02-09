@@ -36,24 +36,47 @@ describe('waiting page round realtime subscription', () => {
   })
 
   describe('auto-redirect on revealed status', () => {
-    function shouldRedirect(status: string): boolean {
+    function shouldRedirectToReveal(status: string): boolean {
       return status === 'revealed'
     }
 
     test('redirects when status is revealed', () => {
-      expect(shouldRedirect('revealed')).toBe(true)
+      expect(shouldRedirectToReveal('revealed')).toBe(true)
     })
 
     test('does not redirect when status is ranking', () => {
-      expect(shouldRedirect('ranking')).toBe(false)
+      expect(shouldRedirectToReveal('ranking')).toBe(false)
     })
 
     test('does not redirect when status is setup', () => {
-      expect(shouldRedirect('setup')).toBe(false)
+      expect(shouldRedirectToReveal('setup')).toBe(false)
     })
 
     test('does not redirect when status is closed', () => {
-      expect(shouldRedirect('closed')).toBe(false)
+      expect(shouldRedirectToReveal('closed')).toBe(false)
+    })
+  })
+
+  describe('auto-redirect to processing when show_processing is enabled', () => {
+    function shouldRedirectToProcessing(
+      status: string,
+      showProcessing: boolean
+    ): boolean {
+      return status === 'processing' && showProcessing
+    }
+
+    test('redirects to processing when status is processing and show_processing is true', () => {
+      expect(shouldRedirectToProcessing('processing', true)).toBe(true)
+    })
+
+    test('does not redirect to processing when show_processing is false', () => {
+      expect(shouldRedirectToProcessing('processing', false)).toBe(false)
+    })
+
+    test('does not redirect to processing when status is not processing', () => {
+      expect(shouldRedirectToProcessing('ranking', true)).toBe(false)
+      expect(shouldRedirectToProcessing('revealed', true)).toBe(false)
+      expect(shouldRedirectToProcessing('closed', true)).toBe(false)
     })
   })
 })
