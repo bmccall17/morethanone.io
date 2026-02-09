@@ -4,6 +4,11 @@
       "count": 1,
       "last": "2026-02-08T22:28:42.774Z",
       "title": "Create a `RevealAnimation` component at `src/components/RevealAnimation.tsx`. It receives the full result payload (ConvergeResult type from `src/lib/engine/types.ts`). It should animate through each elimination round sequentially: show a bar chart of current tallies, highlight the eliminated option, animate vote transfers to remaining options, then advance to the next round. Use CSS transitions/animations (Tailwind + inline styles). End by highlighting the winner. Include a \"Skip\" button that jumps to the final state."
+    },
+    "markdown:devnotes/sprint-hostcontrols-backlog.md:27": {
+      "count": 1,
+      "last": "2026-02-09T17:46:02.800Z",
+      "title": "Create a participant processing view at `src/app/round/[roundId]/processing/page.tsx`. When `show_processing` is enabled and round status is `processing`, redirect participants here from the waiting page. This page subscribes to processing updates via `subscribeToProcessing()` and fetches each round's data as it becomes available. Display the round-by-round results using the existing `RevealAnimation` component from `src/components/RevealAnimation.tsx`, advancing one round at a time as data arrives. When processing completes (status changes to `revealed`), show the full results."
     }
   }
 }
