@@ -3,6 +3,8 @@ export type RoundStatus = 'setup' | 'ranking' | 'closed' | 'revealed'
 export interface RoundSettings {
   allowTies: boolean
   anonymousResults: boolean
+  host_as_participant: boolean
+  show_processing: boolean
 }
 
 export interface Round {

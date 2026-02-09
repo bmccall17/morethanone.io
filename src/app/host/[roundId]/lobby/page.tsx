@@ -17,7 +17,7 @@ interface RoundData {
   prompt: string
   description: string | null
   options: string[]
-  settings: { allowTies: boolean; anonymousResults: boolean }
+  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean }
   status: string
 }
 
