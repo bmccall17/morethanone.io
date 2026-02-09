@@ -2,6 +2,7 @@ import {
   subscribeToRound,
   subscribeToParticipants,
   subscribeToRankings,
+  subscribeToProcessing,
 } from '../realtime'
 
 let capturedCallbacks: Array<(payload: unknown) => void>
@@ -190,6 +191,58 @@ describe('subscribeToRankings', () => {
   test('returns an unsubscribe function that removes the channel', () => {
     const onRankingSubmitted = jest.fn()
     const unsubscribe = subscribeToRankings('round-789', { onRankingSubmitted })
+
+    unsubscribe()
+
+    expect(mockRemoveChannel).toHaveBeenCalledWith(mockChannel)
+  })
+})
+
+describe('subscribeToProcessing', () => {
+  test('subscribes to UPDATE events on rounds table', () => {
+    const onProcessingUpdate = jest.fn()
+    subscribeToProcessing('round-abc', { onProcessingUpdate })
+
+    expect(mockChannel.on).toHaveBeenCalledWith(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'rounds',
+        filter: 'id=eq.round-abc',
+      },
+      expect.any(Function)
+    )
+    expect(mockSubscribe).toHaveBeenCalled()
+  })
+
+  test('calls onProcessingUpdate when current_processing_round changes', () => {
+    const onProcessingUpdate = jest.fn()
+    subscribeToProcessing('round-abc', { onProcessingUpdate })
+
+    capturedCallbacks[0]({
+      new: { current_processing_round: 3 },
+      old: { current_processing_round: 2 },
+    })
+
+    expect(onProcessingUpdate).toHaveBeenCalledWith(3)
+  })
+
+  test('does not call onProcessingUpdate when current_processing_round is unchanged', () => {
+    const onProcessingUpdate = jest.fn()
+    subscribeToProcessing('round-abc', { onProcessingUpdate })
+
+    capturedCallbacks[0]({
+      new: { current_processing_round: 2 },
+      old: { current_processing_round: 2 },
+    })
+
+    expect(onProcessingUpdate).not.toHaveBeenCalled()
+  })
+
+  test('returns an unsubscribe function that removes the channel', () => {
+    const onProcessingUpdate = jest.fn()
+    const unsubscribe = subscribeToProcessing('round-abc', { onProcessingUpdate })
 
     unsubscribe()
 

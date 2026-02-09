@@ -14,6 +14,10 @@ export interface RankingCallbacks {
   onRankingSubmitted: (ranking: Ranking) => void
 }
 
+export interface ProcessingCallbacks {
+  onProcessingUpdate: (roundNumber: number) => void
+}
+
 export function subscribeToRound(
   roundId: string,
   callbacks: RoundCallbacks
@@ -102,6 +106,37 @@ export function subscribeToRankings(
       },
       (payload) => {
         callbacks.onRankingSubmitted(payload.new as Ranking)
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}
+
+export function subscribeToProcessing(
+  roundId: string,
+  callbacks: ProcessingCallbacks
+): () => void {
+  const supabase = createClient()
+
+  const channel: RealtimeChannel = supabase
+    .channel(`processing:${roundId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'rounds',
+        filter: `id=eq.${roundId}`,
+      },
+      (payload) => {
+        const newRound = payload.new.current_processing_round
+        const oldRound = payload.old.current_processing_round
+        if (newRound !== oldRound) {
+          callbacks.onProcessingUpdate(newRound)
+        }
       }
     )
     .subscribe()
