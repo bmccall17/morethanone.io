@@ -16,6 +16,7 @@ export interface Round {
   settings: RoundSettings
   status: RoundStatus
   host_token: string
+  current_processing_round: number
   created_at: string
 }
 
@@ -42,6 +43,7 @@ export interface Result {
   majority_threshold: number
   total_active: number
   rounds_data: RoundData[]
+  processing_data: RoundData[]
   tie_break_info: string | null
   summary: ResultSummary
   computed_at: string

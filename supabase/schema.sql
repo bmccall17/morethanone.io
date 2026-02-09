@@ -11,6 +11,7 @@ create table if not exists rounds (
   settings jsonb not null default '{"allowTies": false, "anonymousResults": false, "host_as_participant": false, "show_processing": false}'::jsonb,
   status text not null default 'setup' check (status in ('setup', 'ranking', 'processing', 'closed', 'revealed')),
   host_token uuid not null,
+  current_processing_round integer not null default 0,
   created_at timestamptz not null default now()
 );
 
@@ -48,6 +49,7 @@ create table if not exists results (
   majority_threshold integer not null,
   total_active integer not null,
   rounds_data jsonb not null default '[]'::jsonb,
+  processing_data jsonb not null default '[]'::jsonb,
   tie_break_info text,
   summary jsonb not null default '{}'::jsonb,
   computed_at timestamptz not null default now()
