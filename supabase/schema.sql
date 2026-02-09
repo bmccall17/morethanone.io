@@ -9,7 +9,7 @@ create table if not exists rounds (
   description text,
   options jsonb not null default '[]'::jsonb,
   settings jsonb not null default '{"allowTies": false, "anonymousResults": false, "host_as_participant": false, "show_processing": false}'::jsonb,
-  status text not null default 'setup' check (status in ('setup', 'ranking', 'closed', 'revealed')),
+  status text not null default 'setup' check (status in ('setup', 'ranking', 'processing', 'closed', 'revealed')),
   host_token uuid not null,
   created_at timestamptz not null default now()
 );

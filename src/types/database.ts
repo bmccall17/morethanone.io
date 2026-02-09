@@ -1,4 +1,4 @@
-export type RoundStatus = 'setup' | 'ranking' | 'closed' | 'revealed'
+export type RoundStatus = 'setup' | 'ranking' | 'processing' | 'closed' | 'revealed'
 
 export interface RoundSettings {
   allowTies: boolean
