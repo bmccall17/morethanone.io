@@ -258,19 +258,20 @@ v0.0.1 is the functional foundation. the full host-to-player loop works end to e
 * jest + ts-jest for testing
 * builds clean, deploys to vercel
 
-### what's NOT in v0.0.1 (deferred to later sprints)
+### what was deferred from v0.0.1 (status)
 
-**deferred from v1 scope to sprint 2:**
+**now shipped:**
 
-* realtime updates (currently polling every 3s — works, not instant)
-* reveal animation (currently static table — functional, not delightful)
-* shareable result card image export
+* ~~realtime updates~~ → shipped in sprint 2
+* ~~reveal animation~~ → shipped in sprint 2
+* ~~shareable result URL~~ → shipped in sprint 3 (URL-based, not image export)
+
+**still outstanding — see devnotes/prdnextsteps.md:**
+
+* shareable result card image export (OG image or canvas-based)
 * countdown to reveal (3…2…1)
 * drag sounds and haptics
-
-**deferred from v1 scope to sprint 3:**
-
-* host remove option
+* host remove option (UI/API)
 * host remove player (db field exists, no UI/API)
 * profanity filter for names/options
 * random fun name generator for players
@@ -279,14 +280,15 @@ v0.0.1 is the functional foundation. the full host-to-player loop works end to e
 * analytics events and instrumentation
 * "felt fair" post-round pulse question
 
-### architecture decisions (v0.0.1)
+### architecture decisions
 
 * **no accounts** — host identity via UUID token in localStorage, verified server-side
 * **no RLS** — access control at API route layer via host token verification
-* **no realtime** — polling every 3s for participant list, submission count, round status
+* **supabase realtime** — postgres_changes subscriptions for status, participants, rankings, processing, reveal view state
 * **options as jsonb** — string array on rounds table, immutable once ranking starts
 * **rankings as jsonb** — ordered string array per participant, readable and simple
 * **engine is pure** — takes rankings in, returns result out, fully testable, no db dependency
+* **reveal state via db column** — host writes reveal_view_state to rounds table, participants receive via realtime subscription
 
 ### v0.0.1 acceptance criteria status
 
@@ -349,37 +351,46 @@ supabase/
 
 ## sprint roadmap
 
-### sprint 1 — foundation (v0.0.1) ✓
+### sprint 1 — foundation ✓ (v0.0.1 ship log)
 
-* data schema + API endpoints
-* core UI (all pages, no delight)
-* processing engine (deterministic, tested)
-* polling-based updates
+* data schema + API endpoints (rounds, participants, rankings, results)
+* core UI (all pages — create, lobby, rank, waiting, reveal)
+* processing engine (deterministic, 14 unit tests, 3-tier tie-breaking)
+* polling-based updates (3s intervals)
 
-### sprint 2 — realtime + delight
+### sprint 2 — realtime + delight ✓ (v0.0.1 release)
 
-* supabase realtime channels (replace polling)
-* reveal animation using result payload
-* countdown to reveal (3…2…1)
-* shareable result card image
-* drag sounds / haptics (mobile)
+* supabase realtime channels (replaced all polling for status, participants, rankings)
+* reveal animation with auto-advancing bar chart + skip button
+* dynamic threshold math
+* ruled-out options shown in ranking UI
 
-### sprint 3 — polish + safety
+### sprint 3 — host controls + share ✓ (v0.0.2, v0.0.3)
 
-* moderation tools (remove participant/option)
-* profanity filter
-* timer for ranking phase
-* max ranks setting
-* random fun name generator
-* post-round pulse question ("felt fair?")
-* basic analytics events
+* host-as-participant toggle (host can rank alongside players)
+* show processing toggle with live round-by-round processing view
+* settings API for host lobby toggles
+* processing lifecycle with stepped algorithm + realtime broadcast
+* share results flow (share URL, public results page)
 
-### sprint 4+ — growth
+### sprint 4 — demo mode ✓ (v0.0.4)
 
-* accounts, teams, saved prompt libraries
-* "discussion then revote" mode
-* integrations (slack, zoom)
-* multi-winner / proportional modes
+* standalone /demo page with 3 pre-built scenarios
+* step-by-step playback with round controls
+* plain-language explanations per round (DemoRunner engine)
+* composite host + participant view
+
+### sprint 5 — host-controlled reveal views (in progress)
+
+* host can switch between 3 reveal layouts, broadcast to all participants in realtime
+* animation view: stepped bar chart with round selector, play button, percentages, explanations
+* selection grid: orange-circle matrix showing how each participant ranked
+* full results table: all-rounds tabular view with votes, %, +/- delta columns
+* new API routes: reveal-view (PATCH), ballots (GET)
+* new realtime subscription: subscribeToRevealView()
+* new db column: reveal_view_state (jsonb on rounds table)
+
+### future sprints — see devnotes/prdnextsteps.md and devnotes/prdparkinglot.md
 
 ---
 

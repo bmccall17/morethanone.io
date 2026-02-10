@@ -10,7 +10,7 @@ export interface DemoScenario {
 /**
  * Scenario 1: Early Leader, Late Overtake
  *
- * A leads strongly in first preferences (6/15).
+ * A leads strongly in first preferences (7/16).
  * C and D are broadly liked but rarely first.
  * E eliminated first → splits to C/D.
  * B eliminated next → heavy tilt to C.
@@ -23,16 +23,17 @@ const earlyLeaderLateOvertake: DemoScenario = {
   participants: [
     'Alex', 'Blake', 'Casey', 'Dana', 'Ellis',
     'Frankie', 'Gray', 'Harper', 'Indigo', 'Jordan',
-    'Kit', 'Lane', 'Morgan', 'Nico', 'Parker',
+    'Kit', 'Lane', 'Morgan', 'Nico', 'Parker', 'Quinn',
   ],
   ballots: [
-    // A-first voters (6) — second prefs split, some go to D
+    // A-first voters (7) — second prefs split, some go to D
     ['A', 'D', 'B', 'C', 'E'],
     ['A', 'D', 'C', 'B', 'E'],
     ['A', 'B', 'D', 'C', 'E'],
     ['A', 'D', 'B', 'E', 'C'],
     ['A', 'B', 'D', 'E', 'C'],
     ['A', 'D', 'C', 'E', 'B'],
+    ['A', 'C', 'D', 'B', 'E'],
     // B-first voters (3) — second prefs mostly C
     ['B', 'C', 'A', 'D', 'E'],
     ['B', 'C', 'D', 'A', 'E'],
@@ -53,7 +54,7 @@ const earlyLeaderLateOvertake: DemoScenario = {
 /**
  * Scenario 2: Polarizing Favorite vs Steady Consensus
  *
- * A has most first preferences (5/12) but is rarely ranked beyond that.
+ * A has most first preferences (6/16) but is rarely ranked beyond that.
  * B and C commonly ranked 2nd and 3rd.
  * D eliminated first → redistributes to B and C.
  * C eliminated next → majority flows to B.
@@ -66,25 +67,29 @@ const polarizingVsConsensus: DemoScenario = {
   participants: [
     'Riley', 'Sage', 'Taylor', 'Uma', 'Val',
     'Wren', 'Xen', 'Yael', 'Zion', 'Ash',
-    'Briar', 'Cypress',
+    'Briar', 'Cypress', 'Darby', 'Echo', 'Fern', 'Glen',
   ],
   ballots: [
-    // A-first voters (5) — polarizing, rarely rank B high
+    // A-first voters (6) — polarizing, rarely rank B high
     ['A', 'D', 'C', 'B'],
     ['A', 'D', 'C', 'B'],
     ['A', 'C', 'D', 'B'],
     ['A', 'D', 'B', 'C'],
     ['A', 'C', 'D', 'B'],
-    // B-first voters (3) — consensus builder
+    ['A', 'D', 'C', 'B'],
+    // B-first voters (4) — consensus builder
     ['B', 'C', 'A', 'D'],
     ['B', 'C', 'D', 'A'],
     ['B', 'D', 'C', 'A'],
-    // C-first voters (3) — second pref is B
+    ['B', 'C', 'A', 'D'],
+    // C-first voters (4) — second pref is B
     ['C', 'B', 'D', 'A'],
     ['C', 'B', 'A', 'D'],
     ['C', 'B', 'D', 'A'],
-    // D-first voter (1) — redistributes to B
+    ['C', 'B', 'A', 'D'],
+    // D-first voters (2) — redistributes to B
     ['D', 'B', 'C', 'A'],
+    ['D', 'C', 'B', 'A'],
   ],
   teachableMoment: 'Demonstrates how a polarizing option can lose to a consensus-friendly one. A was the most popular first choice, but B was broadly acceptable and gathered support from every direction.',
 }
@@ -105,7 +110,7 @@ const comebackFromThird: DemoScenario = {
   participants: [
     'Avery', 'Brook', 'Charlie', 'Drew', 'Emery', 'Finley',
     'Glenn', 'Hadley', 'Ira', 'Jules', 'Kai', 'Lark',
-    'Marlow', 'Noel', 'Oakley', 'Phoenix', 'Quinn', 'Reese',
+    'Marlow', 'Noel', 'Oakley', 'Phoenix',
   ],
   ballots: [
     // A-first voters (5) — some have C in second
@@ -114,11 +119,10 @@ const comebackFromThird: DemoScenario = {
     ['A', 'C', 'D', 'B', 'E', 'F'],
     ['A', 'B', 'D', 'C', 'E', 'F'],
     ['A', 'D', 'C', 'B', 'E', 'F'],
-    // B-first voters (5) — some have C in second
+    // B-first voters (4) — some have C in second
     ['B', 'C', 'A', 'D', 'E', 'F'],
     ['B', 'A', 'C', 'D', 'E', 'F'],
     ['B', 'C', 'D', 'A', 'E', 'F'],
-    ['B', 'A', 'D', 'C', 'E', 'F'],
     ['B', 'C', 'A', 'D', 'E', 'F'],
     // C-first voters (3) — modest first support
     ['C', 'A', 'B', 'D', 'E', 'F'],
@@ -127,9 +131,8 @@ const comebackFromThird: DemoScenario = {
     // D-first voters (2) — redistribute to C
     ['D', 'C', 'A', 'B', 'E', 'F'],
     ['D', 'C', 'B', 'A', 'E', 'F'],
-    // E-first voters (2) — redistribute to C
+    // E-first voter (1) — redistributes to C
     ['E', 'C', 'D', 'A', 'B', 'F'],
-    ['E', 'C', 'A', 'B', 'D', 'F'],
     // F-first voter (1) — redistributes to C
     ['F', 'C', 'D', 'A', 'B', 'E'],
   ],
