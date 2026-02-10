@@ -28,6 +28,13 @@ export default function Home() {
           </Link>
         </div>
 
+        <Link
+          href="/demo"
+          className="inline-block text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
+        >
+          See how it works &rarr;
+        </Link>
+
         <p className="text-xs text-gray-400">
           Rank your options. Watch them converge.
         </p>
