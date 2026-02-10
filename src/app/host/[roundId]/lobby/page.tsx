@@ -406,7 +406,7 @@ export default function HostLobby() {
               className="w-full"
               onClick={handleStart}
               loading={actionLoading}
-              disabled={players.length === 0}
+              disabled={players.length === 0 && !round.settings?.bot_count && !round.settings?.host_as_participant}
             >
               Start ranking
             </Button>

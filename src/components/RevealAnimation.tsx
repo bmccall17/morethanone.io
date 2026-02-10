@@ -18,9 +18,10 @@ interface RevealAnimationProps {
   result: ConvergeResult
   onComplete?: () => void
   showStepButton?: boolean
+  onRoundChange?: (roundNumber: number) => void
 }
 
-export default function RevealAnimation({ result, onComplete, showStepButton }: RevealAnimationProps) {
+export default function RevealAnimation({ result, onComplete, showStepButton, onRoundChange }: RevealAnimationProps) {
   const [phase, setPhase] = useState<Phase>({ type: 'tallies', roundIndex: 0 })
   const [skipped, setSkipped] = useState(false)
   const [manualMode, setManualMode] = useState(false)
@@ -152,6 +153,19 @@ export default function RevealAnimation({ result, onComplete, showStepButton }: 
   const currentRound = rounds[currentRoundIndex]
   const tallies = currentRound.tallies
 
+  // Report round changes for synced panels (How They Voted)
+  // roundNumber drives the eliminatedSet in SelectionGridView:
+  //   eliminatedSet includes rounds[0..roundNumber-1].eliminated
+  const displayRoundNumber = isWinner
+    ? rounds.length
+    : phase.type === 'eliminated' || phase.type === 'transfers'
+      ? currentRoundIndex + 1
+      : currentRoundIndex
+
+  useEffect(() => {
+    onRoundChange?.(displayRoundNumber)
+  }, [displayRoundNumber, onRoundChange])
+
   // During transfer phase, compute the post-transfer tallies to animate toward
   const displayTallies = useMemo(() => {
     if (isWinner) {
@@ -175,6 +189,15 @@ export default function RevealAnimation({ result, onComplete, showStepButton }: 
     }
     return Object.keys(displayTallies)
   }, [isWinner, rounds, displayTallies])
+
+  // Options eliminated in prior rounds (stay visible but faded)
+  const eliminatedBefore = useMemo(() => {
+    const set = new Set<string>()
+    for (let i = 0; i < currentRoundIndex; i++) {
+      if (rounds[i].eliminated) set.add(rounds[i].eliminated!)
+    }
+    return set
+  }, [rounds, currentRoundIndex])
 
   const eliminatedThisRound = !isWinner && (phase.type === 'eliminated' || phase.type === 'transfers')
     ? currentRound.eliminated
@@ -208,41 +231,40 @@ export default function RevealAnimation({ result, onComplete, showStepButton }: 
       {/* Bar chart */}
       <div className="space-y-3" data-testid="bar-chart">
         {allOptions.map(option => {
-          const count = displayTallies[option]
-          const isActive = activeOptions.includes(option)
-          const isEliminated = eliminatedThisRound === option
+          const count = displayTallies[option] ?? 0
+          const isGone = eliminatedBefore.has(option)
+          const isElimNow = eliminatedThisRound === option
           const isTheWinner = isWinner && option === winner
-          const barWidth = count !== undefined ? (count / maxTally) * 100 : 0
-
-          if (!isActive && !isEliminated) {
-            return null
-          }
+          const barWidth = count > 0 ? (count / maxTally) * 100 : 0
 
           return (
             <div
               key={option}
               className={`transition-opacity duration-500 ${
-                isEliminated ? 'opacity-60' : 'opacity-100'
+                isGone ? 'opacity-40' : isElimNow ? 'opacity-60' : 'opacity-100'
               }`}
               data-testid={`bar-${option}`}
-              data-eliminated={isEliminated || undefined}
+              data-eliminated={isElimNow || isGone || undefined}
               data-winner={isTheWinner || undefined}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className={`text-sm font-medium ${
                   isTheWinner
                     ? 'text-indigo-700 font-bold'
-                    : isEliminated
-                      ? 'text-red-500 line-through'
+                    : isGone || isElimNow
+                      ? 'text-gray-400'
                       : 'text-gray-700'
                 }`}>
-                  {option}
+                  {isGone || isElimNow ? <s>{option}</s> : option}
                   {isTheWinner && <span className="ml-2 text-indigo-500 text-xs">Winner</span>}
+                  {(isGone || isElimNow) && (
+                    <span className="ml-2 text-red-400 text-xs font-normal">eliminated</span>
+                  )}
                 </span>
                 <span className={`text-sm font-mono ${
-                  isEliminated ? 'text-red-400' : 'text-gray-500'
+                  isGone || isElimNow ? 'text-gray-400' : 'text-gray-500'
                 }`}>
-                  {count ?? 0}
+                  {count}
                 </span>
               </div>
               <div className="h-6 bg-gray-100 rounded-full overflow-hidden">
@@ -250,7 +272,7 @@ export default function RevealAnimation({ result, onComplete, showStepButton }: 
                   className={`h-full rounded-full transition-all duration-700 ease-out ${
                     isTheWinner
                       ? 'bg-indigo-500'
-                      : isEliminated
+                      : isGone || isElimNow
                         ? 'bg-red-300'
                         : 'bg-indigo-400'
                   }`}

@@ -45,6 +45,7 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
   const [ballots, setBallots] = useState<Ballot[]>([])
   const [options, setOptions] = useState<string[]>([])
   const [animationComplete, setAnimationComplete] = useState(false)
+  const [animationRound, setAnimationRound] = useState(0)
   const [revealLoading, setRevealLoading] = useState(false)
   const processTriggered = useRef(false)
 
@@ -134,6 +135,13 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
       })
       if (res.ok) {
         router.push(redirectOnReveal)
+      } else {
+        const data = await res.json()
+        console.error('[Reveal failed]', res.status, data)
+        // If already revealed, just redirect
+        if (res.status === 400) {
+          router.push(redirectOnReveal)
+        }
       }
     } finally {
       setRevealLoading(false)
@@ -166,12 +174,22 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
         {convergeResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
-              <RevealAnimation result={convergeResult} showStepButton={showStepButton} onComplete={() => setAnimationComplete(true)} />
+              <RevealAnimation
+                result={convergeResult}
+                showStepButton={showStepButton}
+                onComplete={() => setAnimationComplete(true)}
+                onRoundChange={setAnimationRound}
+              />
             </Card>
             {ballots.length > 0 && options.length > 0 && (
               <Card>
                 <h3 className="text-sm font-medium text-gray-500 mb-3">How They Voted</h3>
-                <SelectionGridView ballots={ballots} options={options} />
+                <SelectionGridView
+                  ballots={ballots}
+                  options={options}
+                  rounds={convergeResult.rounds}
+                  roundNumber={animationRound}
+                />
               </Card>
             )}
           </div>

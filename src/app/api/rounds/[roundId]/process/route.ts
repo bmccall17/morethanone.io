@@ -115,10 +115,10 @@ export async function POST(
     }
   }
 
-  // Auto-reveal: transition directly to revealed so participants redirect
+  // Transition to closed — host will explicitly reveal when ready
   const { error: statusError } = await supabase
     .from('rounds')
-    .update({ status: 'revealed', reveal_view_state: { view: 'animation', animationRound: 1 } })
+    .update({ status: 'closed' })
     .eq('id', roundId)
 
   if (statusError) {
@@ -126,7 +126,7 @@ export async function POST(
   }
 
   return NextResponse.json({
-    status: 'revealed',
+    status: 'closed',
     total_rounds: result.rounds.length,
     winner: result.winner,
     summary: result.summary,

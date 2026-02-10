@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import DraggableRankList from '@/components/DraggableRankList'
@@ -18,6 +18,12 @@ export default function RankPage() {
   const [error, setError] = useState('')
 
   const participantId = typeof window !== 'undefined' ? getParticipantId(roundId) : null
+
+  // Shuffle options once so each participant sees a random order
+  const shuffledOptions = useMemo(() => {
+    if (!round?.options) return []
+    return [...round.options].sort(() => Math.random() - 0.5)
+  }, [round?.options])
 
   useEffect(() => {
     async function fetchRound() {
@@ -128,7 +134,7 @@ export default function RankPage() {
         {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
         <DraggableRankList
-          options={round.options}
+          options={shuffledOptions}
           onSubmit={handleSubmit}
           loading={submitLoading}
         />
