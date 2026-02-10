@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { pickBotNames } from '@/lib/bot-names'
 
 export async function POST(
   request: Request,
@@ -17,7 +18,7 @@ export async function POST(
   // Verify host
   const { data: round, error: roundError } = await supabase
     .from('rounds')
-    .select('id, status, host_token, settings')
+    .select('id, status, host_token, settings, options')
     .eq('id', roundId)
     .single()
 
@@ -59,6 +60,30 @@ export async function POST(
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
+
+  // Create bot participants if configured
+  const botCount = round.settings?.bot_count ?? 0
+  if (botCount > 0 && round.options?.length >= 2) {
+    const botNames = pickBotNames(botCount)
+    for (const name of botNames) {
+      try {
+        const { data: botParticipant } = await supabase
+          .from('participants')
+          .insert({ round_id: roundId, display_name: name })
+          .select('id')
+          .single()
+
+        if (botParticipant) {
+          const shuffled = [...round.options].sort(() => Math.random() - 0.5)
+          await supabase
+            .from('rankings')
+            .insert({ round_id: roundId, participant_id: botParticipant.id, ranking: shuffled })
+        }
+      } catch {
+        // Silently skip failed bots — don't block the round
+      }
+    }
   }
 
   return NextResponse.json({

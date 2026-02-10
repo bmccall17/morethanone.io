@@ -57,26 +57,53 @@ describe('waiting page round realtime subscription', () => {
     })
   })
 
-  describe('auto-redirect to processing when show_processing is enabled', () => {
-    function shouldRedirectToProcessing(
-      status: string,
-      showProcessing: boolean
-    ): boolean {
-      return status === 'processing' && showProcessing
+  describe('auto-redirect to processing', () => {
+    function shouldRedirectToProcessing(status: string): boolean {
+      return status === 'processing'
     }
 
-    test('redirects to processing when status is processing and show_processing is true', () => {
-      expect(shouldRedirectToProcessing('processing', true)).toBe(true)
+    test('redirects to processing when status is processing', () => {
+      expect(shouldRedirectToProcessing('processing')).toBe(true)
     })
 
-    test('does not redirect to processing when show_processing is false', () => {
-      expect(shouldRedirectToProcessing('processing', false)).toBe(false)
+    test('does not redirect to processing when status is ranking', () => {
+      expect(shouldRedirectToProcessing('ranking')).toBe(false)
     })
 
-    test('does not redirect to processing when status is not processing', () => {
-      expect(shouldRedirectToProcessing('ranking', true)).toBe(false)
-      expect(shouldRedirectToProcessing('revealed', true)).toBe(false)
-      expect(shouldRedirectToProcessing('closed', true)).toBe(false)
+    test('does not redirect to processing when status is revealed', () => {
+      expect(shouldRedirectToProcessing('revealed')).toBe(false)
+    })
+
+    test('does not redirect to processing when status is closed', () => {
+      expect(shouldRedirectToProcessing('closed')).toBe(false)
+    })
+  })
+
+  describe('polling fallback logic', () => {
+    function shouldRedirectFromPoll(status: string): 'processing' | 'reveal' | null {
+      if (status === 'processing') return 'processing'
+      if (status === 'revealed') return 'reveal'
+      return null
+    }
+
+    test('redirects to processing on poll result', () => {
+      expect(shouldRedirectFromPoll('processing')).toBe('processing')
+    })
+
+    test('redirects to reveal on poll result', () => {
+      expect(shouldRedirectFromPoll('revealed')).toBe('reveal')
+    })
+
+    test('does not redirect on ranking poll result', () => {
+      expect(shouldRedirectFromPoll('ranking')).toBeNull()
+    })
+
+    test('does not redirect on closed poll result', () => {
+      expect(shouldRedirectFromPoll('closed')).toBeNull()
+    })
+
+    test('does not redirect on setup poll result', () => {
+      expect(shouldRedirectFromPoll('setup')).toBeNull()
     })
   })
 })

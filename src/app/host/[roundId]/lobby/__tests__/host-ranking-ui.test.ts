@@ -5,6 +5,7 @@ const defaultSettings: RoundSettings = {
   anonymousResults: false,
   host_as_participant: true,
   show_processing: false,
+  bot_count: 0,
 }
 
 interface RoundData {

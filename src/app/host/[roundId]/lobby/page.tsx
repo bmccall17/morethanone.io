@@ -19,7 +19,7 @@ interface RoundData {
   prompt: string
   description: string | null
   options: string[]
-  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean }
+  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean; bot_count: number }
   status: string
 }
 
@@ -194,6 +194,23 @@ export default function HostLobby() {
     }
   }
 
+  async function handleBotCountChange(count: number) {
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/settings`, {
+        method: 'PATCH',
+        headers: { ...getHostHeaders(roundId), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bot_count: count }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+      setRound((prev) => prev ? { ...prev, settings: { ...prev.settings, bot_count: count } } : prev)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update setting')
+    }
+  }
+
   async function handleToggleShowProcessing(checked: boolean) {
     try {
       const res = await fetch(`/api/rounds/${roundId}/settings`, {
@@ -341,13 +358,31 @@ export default function HostLobby() {
 
         {round.status === 'setup' && (
           <Card>
-            <Toggle
-              label="Participate in this round"
-              description="Join as a participant and submit your own ranking"
-              checked={round.settings?.host_as_participant ?? false}
-              onChange={handleToggleParticipate}
-              disabled={round.status !== 'setup'}
-            />
+            <div className="space-y-4">
+              <Toggle
+                label="Participate in this round"
+                description="Join as a participant and submit your own ranking"
+                checked={round.settings?.host_as_participant ?? false}
+                onChange={handleToggleParticipate}
+                disabled={round.status !== 'setup'}
+              />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Bot voters</p>
+                  <p className="text-xs text-gray-500">Add bots with wacky names and random rankings</p>
+                </div>
+                <select
+                  value={round.settings?.bot_count ?? 0}
+                  onChange={(e) => handleBotCountChange(Number(e.target.value))}
+                  className="rounded-md border border-gray-300 text-sm py-1 px-2 text-gray-700"
+                >
+                  <option value={0}>None</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </Card>
         )}
 

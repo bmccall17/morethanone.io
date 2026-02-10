@@ -39,6 +39,24 @@ export default function WaitingPage() {
     })
   }, [roundId, router])
 
+  // Polling fallback — safety net in case realtime misses a status change
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/rounds/${roundId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.status === 'processing') {
+            router.push(`/round/${roundId}/processing`)
+          } else if (data.status === 'revealed') {
+            router.push(`/round/${roundId}/reveal`)
+          }
+        }
+      } catch { /* ignore polling errors */ }
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [roundId, router])
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="max-w-sm w-full text-center space-y-4">

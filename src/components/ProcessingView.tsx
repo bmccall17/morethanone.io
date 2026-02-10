@@ -34,9 +34,10 @@ interface ProcessingViewProps {
   roundId: string
   redirectOnReveal: string
   triggerProcess?: boolean
+  showStepButton?: boolean
 }
 
-export default function ProcessingView({ roundId, redirectOnReveal, triggerProcess }: ProcessingViewProps) {
+export default function ProcessingView({ roundId, redirectOnReveal, triggerProcess, showStepButton }: ProcessingViewProps) {
   const router = useRouter()
   const [rounds, setRounds] = useState<RoundData[]>([])
   const [result, setResult] = useState<ResultData | null>(null)
@@ -147,7 +148,7 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
         {convergeResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
-              <RevealAnimation result={convergeResult} />
+              <RevealAnimation result={convergeResult} showStepButton={showStepButton} />
             </Card>
             {ballots.length > 0 && options.length > 0 && (
               <Card>

@@ -6,6 +6,7 @@ describe('RoundSettings', () => {
     anonymousResults: false,
     host_as_participant: false,
     show_processing: false,
+    bot_count: 0,
   }
 
   test('includes host_as_participant field', () => {
@@ -16,8 +17,14 @@ describe('RoundSettings', () => {
     expect(defaultSettings.show_processing).toBe(false)
   })
 
-  test('all settings default to false', () => {
-    expect(Object.values(defaultSettings).every(v => v === false)).toBe(true)
+  test('includes bot_count field', () => {
+    expect(defaultSettings.bot_count).toBe(0)
+  })
+
+  test('all boolean settings default to false', () => {
+    const { bot_count, ...booleanSettings } = defaultSettings
+    expect(Object.values(booleanSettings).every(v => v === false)).toBe(true)
+    expect(bot_count).toBe(0)
   })
 
   test('settings object is assignable to Round.settings', () => {
@@ -30,10 +37,13 @@ describe('RoundSettings', () => {
       settings: defaultSettings,
       status: 'setup' as const,
       host_token: 'token',
+      current_processing_round: 0,
+      reveal_view_state: { view: 'animation' as const, animationRound: 0 },
       created_at: new Date().toISOString(),
     } satisfies Round
 
     expect(round.settings.host_as_participant).toBe(false)
     expect(round.settings.show_processing).toBe(false)
+    expect(round.settings.bot_count).toBe(0)
   })
 })

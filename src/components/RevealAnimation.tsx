@@ -17,11 +17,13 @@ const TRANSFER_DURATION = 1200
 interface RevealAnimationProps {
   result: ConvergeResult
   onComplete?: () => void
+  showStepButton?: boolean
 }
 
-export default function RevealAnimation({ result, onComplete }: RevealAnimationProps) {
+export default function RevealAnimation({ result, onComplete, showStepButton }: RevealAnimationProps) {
   const [phase, setPhase] = useState<Phase>({ type: 'tallies', roundIndex: 0 })
   const [skipped, setSkipped] = useState(false)
+  const [manualMode, setManualMode] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { rounds, winner } = result
@@ -84,8 +86,15 @@ export default function RevealAnimation({ result, onComplete }: RevealAnimationP
     })
   }, [rounds])
 
+  // In manual mode, fire onComplete when we reach winner
   useEffect(() => {
-    if (skipped) return
+    if (manualMode && phase.type === 'winner') {
+      onComplete?.()
+    }
+  }, [manualMode, phase, onComplete])
+
+  useEffect(() => {
+    if (skipped || manualMode) return
     if (phase.type === 'winner') {
       onComplete?.()
       return
@@ -100,13 +109,40 @@ export default function RevealAnimation({ result, onComplete }: RevealAnimationP
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [phase, skipped, advance, onComplete])
+  }, [phase, skipped, manualMode, advance, onComplete])
 
   const handleSkip = () => {
     if (timerRef.current) clearTimeout(timerRef.current)
     setSkipped(true)
     setPhase({ type: 'winner' })
     onComplete?.()
+  }
+
+  const handleStep = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setManualMode(true)
+    setPhase(prev => {
+      if (prev.type === 'winner') return prev
+      // Compute next phase inline (same logic as advance)
+      if (prev.type === 'tallies') {
+        const round = rounds[prev.roundIndex]
+        if (round.eliminated) return { type: 'eliminated', roundIndex: prev.roundIndex }
+        return { type: 'winner' }
+      }
+      if (prev.type === 'eliminated') {
+        const round = rounds[prev.roundIndex]
+        if (round.transfers.length > 0) return { type: 'transfers', roundIndex: prev.roundIndex }
+        const nextIndex = prev.roundIndex + 1
+        if (nextIndex < rounds.length) return { type: 'tallies', roundIndex: nextIndex }
+        return { type: 'winner' }
+      }
+      if (prev.type === 'transfers') {
+        const nextIndex = prev.roundIndex + 1
+        if (nextIndex < rounds.length) return { type: 'tallies', roundIndex: nextIndex }
+        return { type: 'winner' }
+      }
+      return prev
+    })
   }
 
   const isWinner = skipped || phase.type === 'winner'
@@ -156,9 +192,16 @@ export default function RevealAnimation({ result, onComplete }: RevealAnimationP
           {isWinner ? 'Final Result' : `Round ${currentRound.round_number}`}
         </h3>
         {!isWinner && (
-          <Button variant="ghost" size="sm" onClick={handleSkip} data-testid="skip-button">
-            Skip
-          </Button>
+          <div className="flex gap-2">
+            {showStepButton && (
+              <Button variant="ghost" size="sm" onClick={handleStep} data-testid="step-button">
+                Step &gt;
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={handleSkip} data-testid="skip-button">
+              Skip
+            </Button>
+          </div>
         )}
       </div>
 

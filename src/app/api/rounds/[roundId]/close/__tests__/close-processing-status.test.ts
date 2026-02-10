@@ -5,6 +5,7 @@ const defaultSettings: RoundSettings = {
   anonymousResults: false,
   host_as_participant: false,
   show_processing: false,
+  bot_count: 0,
 }
 
 describe('close route status selection logic', () => {
@@ -30,6 +31,7 @@ describe('close route status selection logic', () => {
       anonymousResults: false,
       host_as_participant: false,
       show_processing: false,
+      bot_count: 0,
     }
     expect(determineCloseStatus(settings)).toBe('closed')
   })
@@ -40,6 +42,7 @@ describe('close route status selection logic', () => {
       anonymousResults: true,
       host_as_participant: true,
       show_processing: true,
+      bot_count: 0,
     }
     expect(determineCloseStatus(settings)).toBe('processing')
   })

@@ -5,6 +5,7 @@ const defaultSettings: RoundSettings = {
   anonymousResults: false,
   host_as_participant: false,
   show_processing: false,
+  bot_count: 0,
 }
 
 interface RoundData {
@@ -68,7 +69,7 @@ describe('show processing toggle logic', () => {
 
     test('preserves other settings when toggling', () => {
       const round = makeRound({
-        settings: { allowTies: true, anonymousResults: true, host_as_participant: true, show_processing: false },
+        settings: { allowTies: true, anonymousResults: true, host_as_participant: true, show_processing: false, bot_count: 0 },
       })
       const result = applyToggle(round, true)
       expect(result?.settings).toEqual({
@@ -76,6 +77,7 @@ describe('show processing toggle logic', () => {
         anonymousResults: true,
         host_as_participant: true,
         show_processing: true,
+        bot_count: 0,
       })
     })
 

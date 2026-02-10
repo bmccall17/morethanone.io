@@ -1,10 +1,12 @@
 import type { RoundSettings } from '@/types/database'
+import { pickBotNames } from '@/lib/bot-names'
 
 const defaultSettings: RoundSettings = {
   allowTies: false,
   anonymousResults: false,
   host_as_participant: false,
   show_processing: false,
+  bot_count: 0,
 }
 
 describe('start route host participant logic', () => {
@@ -104,5 +106,48 @@ describe('host participant record shape', () => {
   test('uses the correct round_id', () => {
     const insert = buildParticipantInsert('round-456')
     expect(insert.round_id).toBe('round-456')
+  })
+})
+
+describe('bot creation logic', () => {
+  function shouldCreateBots(settings: RoundSettings | null | undefined, optionsCount: number): boolean {
+    const botCount = settings?.bot_count ?? 0
+    return botCount > 0 && optionsCount >= 2
+  }
+
+  test('creates bots when bot_count > 0 and options >= 2', () => {
+    const settings: RoundSettings = { ...defaultSettings, bot_count: 3 }
+    expect(shouldCreateBots(settings, 4)).toBe(true)
+  })
+
+  test('does not create bots when bot_count is 0', () => {
+    expect(shouldCreateBots(defaultSettings, 4)).toBe(false)
+  })
+
+  test('does not create bots when settings is null', () => {
+    expect(shouldCreateBots(null, 4)).toBe(false)
+  })
+
+  test('does not create bots when options < 2', () => {
+    const settings: RoundSettings = { ...defaultSettings, bot_count: 3 }
+    expect(shouldCreateBots(settings, 1)).toBe(false)
+  })
+
+  test('pickBotNames returns requested count of unique names', () => {
+    const names = pickBotNames(5)
+    expect(names).toHaveLength(5)
+    expect(new Set(names).size).toBe(5)
+  })
+
+  test('pickBotNames returns at most the pool size', () => {
+    const names = pickBotNames(100)
+    expect(names.length).toBeLessThanOrEqual(20)
+  })
+
+  test('bot ranking is a shuffled copy of options', () => {
+    const options = ['A', 'B', 'C', 'D']
+    const shuffled = [...options].sort(() => Math.random() - 0.5)
+    expect(shuffled).toHaveLength(options.length)
+    expect(shuffled.sort()).toEqual(options.sort())
   })
 })

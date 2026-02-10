@@ -8,6 +8,7 @@ export interface RoundSettings {
   anonymousResults: boolean
   host_as_participant: boolean
   show_processing: boolean
+  bot_count: number
 }
 
 export interface Round {

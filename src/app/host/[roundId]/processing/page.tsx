@@ -12,6 +12,7 @@ export default function HostProcessingPage() {
       roundId={roundId}
       redirectOnReveal={`/host/${roundId}/reveal`}
       triggerProcess
+      showStepButton
     />
   )
 }

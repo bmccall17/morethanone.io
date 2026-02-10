@@ -5,6 +5,7 @@ const defaultSettings: RoundSettings = {
   anonymousResults: false,
   host_as_participant: false,
   show_processing: false,
+  bot_count: 0,
 }
 
 describe('settings API merge logic', () => {
@@ -22,6 +23,7 @@ describe('settings API merge logic', () => {
       anonymousResults: false,
       host_as_participant: true,
       show_processing: false,
+      bot_count: 0,
     })
   })
 
@@ -31,12 +33,14 @@ describe('settings API merge logic', () => {
       anonymousResults: true,
       host_as_participant: false,
       show_processing: true,
+      bot_count: 3,
     }
     const result = mergeSettings(existing, { host_as_participant: true })
     expect(result.allowTies).toBe(true)
     expect(result.anonymousResults).toBe(true)
     expect(result.show_processing).toBe(true)
     expect(result.host_as_participant).toBe(true)
+    expect(result.bot_count).toBe(3)
   })
 
   test('can toggle host_as_participant back to false', () => {
@@ -58,6 +62,12 @@ describe('settings API merge logic', () => {
   test('empty patch returns same values', () => {
     const result = mergeSettings(defaultSettings, {})
     expect(result).toEqual(defaultSettings)
+  })
+
+  test('merges bot_count into settings', () => {
+    const result = mergeSettings(defaultSettings, { bot_count: 5 })
+    expect(result.bot_count).toBe(5)
+    expect(result.allowTies).toBe(false)
   })
 })
 

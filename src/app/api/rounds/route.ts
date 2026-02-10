@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         prompt,
         description: description || null,
         options,
-        settings: settings || { allowTies: false, anonymousResults: false, host_as_participant: false, show_processing: false },
+        settings: settings || { allowTies: false, anonymousResults: false, host_as_participant: false, show_processing: false, bot_count: 0 },
         status: 'setup',
         host_token: hostToken,
       })
