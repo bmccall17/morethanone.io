@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function PATCH(
+export async function POST(
   request: Request,
   { params }: { params: Promise<{ roundId: string }> }
 ) {
@@ -16,7 +16,7 @@ export async function PATCH(
 
   const { data: round, error: roundError } = await supabase
     .from('rounds')
-    .select('id, status, host_token, settings')
+    .select('id, status, host_token')
     .eq('id', roundId)
     .single()
 
@@ -28,32 +28,18 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: Record<string, unknown>
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  if (round.status !== 'closed') {
+    return NextResponse.json({ error: 'Round must be closed to start processing' }, { status: 400 })
   }
-
-  // Allow show_processing toggle when status is 'closed'; all other settings require 'setup'
-  const isShowProcessingOnly = Object.keys(body).length === 1 && 'show_processing' in body
-  if (round.status === 'closed' && !isShowProcessingOnly) {
-    return NextResponse.json({ error: 'Settings can only be changed during setup' }, { status: 400 })
-  }
-  if (round.status !== 'setup' && round.status !== 'closed') {
-    return NextResponse.json({ error: 'Settings can only be changed during setup' }, { status: 400 })
-  }
-
-  const updatedSettings = { ...round.settings, ...body }
 
   const { error: updateError } = await supabase
     .from('rounds')
-    .update({ settings: updatedSettings })
+    .update({ status: 'processing' })
     .eq('id', roundId)
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  return NextResponse.json({ settings: updatedSettings })
+  return NextResponse.json({ status: 'processing' })
 }

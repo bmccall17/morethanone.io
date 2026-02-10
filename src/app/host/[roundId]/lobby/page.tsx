@@ -55,6 +55,8 @@ export default function HostLobby() {
         setRound(data)
         if (data.status === 'revealed') {
           router.push(`/host/${roundId}/reveal`)
+        } else if (data.status === 'processing') {
+          router.push(`/host/${roundId}/processing`)
         }
       }
       if (playersRes.status === 'fulfilled' && playersRes.value.ok) {
@@ -106,6 +108,8 @@ export default function HostLobby() {
         setRound((prev) => (prev ? { ...prev, status } : prev))
         if (status === 'revealed') {
           router.push(`/host/${roundId}/reveal`)
+        } else if (status === 'processing') {
+          router.push(`/host/${roundId}/processing`)
         }
       },
     })
@@ -134,26 +138,6 @@ export default function HostLobby() {
     }
   }
 
-  async function handleProcess() {
-    setActionLoading(true)
-    setError('')
-    try {
-      const res = await fetch(`/api/rounds/${roundId}/process`, {
-        method: 'POST',
-        headers: getHostHeaders(roundId),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error)
-      }
-      // Process API transitions status to 'closed', which comes via realtime
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed')
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
   async function handleClose() {
     setActionLoading(true)
     setError('')
@@ -166,6 +150,26 @@ export default function HostLobby() {
         const data = await res.json()
         throw new Error(data.error)
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleStartProcessing() {
+    setActionLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/start-processing`, {
+        method: 'POST',
+        headers: getHostHeaders(roundId),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+      router.push(`/host/${roundId}/processing`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {
@@ -335,22 +339,28 @@ export default function HostLobby() {
           </Card>
         )}
 
-        <Card>
-          <Toggle
-            label="Participate in this round"
-            description="Join as a participant and submit your own ranking"
-            checked={round.settings?.host_as_participant ?? false}
-            onChange={handleToggleParticipate}
-            disabled={round.status !== 'setup'}
-          />
-          <Toggle
-            label="Show live processing to participants"
-            description="Let participants see results as they are calculated"
-            checked={round.settings?.show_processing ?? false}
-            onChange={handleToggleShowProcessing}
-            disabled={round.status !== 'setup'}
-          />
-        </Card>
+        {round.status === 'setup' && (
+          <Card>
+            <Toggle
+              label="Participate in this round"
+              description="Join as a participant and submit your own ranking"
+              checked={round.settings?.host_as_participant ?? false}
+              onChange={handleToggleParticipate}
+              disabled={round.status !== 'setup'}
+            />
+          </Card>
+        )}
+
+        {round.status === 'closed' && (
+          <Card>
+            <Toggle
+              label="Show live processing to participants"
+              description="Let participants see results as they are calculated"
+              checked={round.settings?.show_processing ?? false}
+              onChange={handleToggleShowProcessing}
+            />
+          </Card>
+        )}
 
         {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
@@ -377,17 +387,18 @@ export default function HostLobby() {
               Close ranking
             </Button>
           )}
-          {round.status === 'processing' && (
+          {round.status === 'closed' && round.settings?.show_processing && (
             <Button
               size="lg"
               className="w-full"
-              onClick={handleProcess}
+              onClick={handleStartProcessing}
               loading={actionLoading}
+              disabled={submissionCount === 0}
             >
-              {actionLoading ? 'Processing...' : 'Run processing'}
+              Start live processing
             </Button>
           )}
-          {round.status === 'closed' && (
+          {round.status === 'closed' && !round.settings?.show_processing && (
             <Button
               size="lg"
               className="w-full"

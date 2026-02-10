@@ -3,14 +3,15 @@
 import { useParams } from 'next/navigation'
 import ProcessingView from '@/components/ProcessingView'
 
-export default function ProcessingPage() {
+export default function HostProcessingPage() {
   const params = useParams()
   const roundId = params.roundId as string
 
   return (
     <ProcessingView
       roundId={roundId}
-      redirectOnReveal={`/round/${roundId}/reveal`}
+      redirectOnReveal={`/host/${roundId}/reveal`}
+      triggerProcess
     />
   )
 }

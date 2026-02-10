@@ -1,50 +1,36 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import { subscribeToRound } from '@/lib/realtime'
-import type { RoundSettings } from '@/types/database'
 
 export default function WaitingPage() {
   const params = useParams()
   const router = useRouter()
   const roundId = params.roundId as string
-  const [showProcessing, setShowProcessing] = useState(false)
-  const showProcessingRef = useRef(false)
 
-  // Keep ref in sync so the realtime callback always sees latest value
+  // Check current status on mount (for late arrivals)
   useEffect(() => {
-    showProcessingRef.current = showProcessing
-  }, [showProcessing])
-
-  useEffect(() => {
-    async function fetchSettings() {
+    async function checkStatus() {
       const res = await fetch(`/api/rounds/${roundId}`)
       if (res.ok) {
         const data = await res.json()
-        const settings = data.settings as RoundSettings
-        const sp = settings?.show_processing ?? false
-        showProcessingRef.current = sp
-        setShowProcessing(sp)
-
-        // Handle case where status already transitioned before page loaded
-        if (data.status === 'processing' && sp) {
+        if (data.status === 'processing') {
           router.push(`/round/${roundId}/processing`)
         } else if (data.status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
-        } else if (data.status === 'closed') {
-          // Processing already finished, wait for reveal
         }
       }
     }
-    fetchSettings()
+    checkStatus()
   }, [roundId, router])
 
+  // Subscribe to status changes
   useEffect(() => {
     return subscribeToRound(roundId, {
       onStatusChange: (status) => {
-        if (status === 'processing' && showProcessingRef.current) {
+        if (status === 'processing') {
           router.push(`/round/${roundId}/processing`)
         } else if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)

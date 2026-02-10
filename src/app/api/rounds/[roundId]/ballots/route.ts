@@ -19,7 +19,7 @@ export async function GET(
     return NextResponse.json({ error: 'Round not found' }, { status: 404 })
   }
 
-  if (round.status !== 'revealed') {
+  if (!['processing', 'closed', 'revealed'].includes(round.status)) {
     return NextResponse.json({ error: 'Results not yet available' }, { status: 400 })
   }
 

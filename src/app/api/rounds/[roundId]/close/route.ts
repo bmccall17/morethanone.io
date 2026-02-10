@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import type { RoundSettings } from '@/types/database'
 
 export async function POST(
   request: Request,
@@ -17,7 +16,7 @@ export async function POST(
 
   const { data: round, error: roundError } = await supabase
     .from('rounds')
-    .select('id, status, host_token, settings')
+    .select('id, status, host_token')
     .eq('id', roundId)
     .single()
 
@@ -33,17 +32,14 @@ export async function POST(
     return NextResponse.json({ error: 'Round is not in ranking phase' }, { status: 400 })
   }
 
-  const settings = round.settings as RoundSettings
-  const newStatus = settings.show_processing ? 'processing' : 'closed'
-
   const { error: updateError } = await supabase
     .from('rounds')
-    .update({ status: newStatus })
+    .update({ status: 'closed' })
     .eq('id', roundId)
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  return NextResponse.json({ status: newStatus })
+  return NextResponse.json({ status: 'closed' })
 }
