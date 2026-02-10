@@ -15,6 +15,7 @@ export interface DemoScenario {
  * E eliminated first → splits to C/D.
  * B eliminated next → heavy tilt to C.
  * C overtakes A in later rounds.
+ * Some voters only rank 2–4 options (partial ballots).
  */
 const earlyLeaderLateOvertake: DemoScenario = {
   name: 'Early Leader, Late Overtake',
@@ -26,27 +27,27 @@ const earlyLeaderLateOvertake: DemoScenario = {
     'Kit', 'Lane', 'Morgan', 'Nico', 'Parker', 'Quinn',
   ],
   ballots: [
-    // A-first voters (7) — second prefs split, some go to D
+    // A-first voters (7) — varying depth
     ['A', 'D', 'B', 'C', 'E'],
-    ['A', 'D', 'C', 'B', 'E'],
+    ['A', 'D', 'C'],
     ['A', 'B', 'D', 'C', 'E'],
-    ['A', 'D', 'B', 'E', 'C'],
+    ['A', 'D'],
     ['A', 'B', 'D', 'E', 'C'],
     ['A', 'D', 'C', 'E', 'B'],
-    ['A', 'C', 'D', 'B', 'E'],
+    ['A', 'C', 'D'],
     // B-first voters (3) — second prefs mostly C
     ['B', 'C', 'A', 'D', 'E'],
-    ['B', 'C', 'D', 'A', 'E'],
-    ['B', 'C', 'A', 'E', 'D'],
-    // C-first voters (2) — modest first support
+    ['B', 'C', 'D'],
+    ['B', 'C'],
+    // C-first voters (2)
     ['C', 'B', 'D', 'A', 'E'],
-    ['C', 'D', 'B', 'A', 'E'],
+    ['C', 'D', 'B'],
     // D-first voters (2)
     ['D', 'C', 'B', 'A', 'E'],
-    ['D', 'C', 'A', 'B', 'E'],
+    ['D', 'C', 'A'],
     // E-first voters (2) — redistribute to C and D
     ['E', 'C', 'D', 'A', 'B'],
-    ['E', 'D', 'C', 'B', 'A'],
+    ['E', 'D', 'C'],
   ],
   teachableMoment: 'Shows how broad, consistent second preferences can outweigh early dominance. A had the most first-choice votes but lacked depth of support across the group.',
 }
@@ -59,6 +60,7 @@ const earlyLeaderLateOvertake: DemoScenario = {
  * D eliminated first → redistributes to B and C.
  * C eliminated next → majority flows to B.
  * B surpasses A.
+ * Some voters rank only 2–3 options.
  */
 const polarizingVsConsensus: DemoScenario = {
   name: 'Polarizing Favorite vs Steady Consensus',
@@ -72,24 +74,24 @@ const polarizingVsConsensus: DemoScenario = {
   ballots: [
     // A-first voters (6) — polarizing, rarely rank B high
     ['A', 'D', 'C', 'B'],
-    ['A', 'D', 'C', 'B'],
-    ['A', 'C', 'D', 'B'],
+    ['A', 'D', 'C'],
+    ['A', 'C', 'D'],
     ['A', 'D', 'B', 'C'],
-    ['A', 'C', 'D', 'B'],
-    ['A', 'D', 'C', 'B'],
+    ['A', 'C'],
+    ['A', 'D'],
     // B-first voters (4) — consensus builder
     ['B', 'C', 'A', 'D'],
-    ['B', 'C', 'D', 'A'],
+    ['B', 'C', 'D'],
     ['B', 'D', 'C', 'A'],
-    ['B', 'C', 'A', 'D'],
+    ['B', 'C'],
     // C-first voters (4) — second pref is B
     ['C', 'B', 'D', 'A'],
-    ['C', 'B', 'A', 'D'],
-    ['C', 'B', 'D', 'A'],
-    ['C', 'B', 'A', 'D'],
+    ['C', 'B', 'A'],
+    ['C', 'B', 'D'],
+    ['C', 'B'],
     // D-first voters (2) — redistributes to B
     ['D', 'B', 'C', 'A'],
-    ['D', 'C', 'B', 'A'],
+    ['D', 'C', 'B'],
   ],
   teachableMoment: 'Demonstrates how a polarizing option can lose to a consensus-friendly one. A was the most popular first choice, but B was broadly acceptable and gathered support from every direction.',
 }
@@ -102,6 +104,7 @@ const polarizingVsConsensus: DemoScenario = {
  * F and E eliminated first → flow disproportionately to C.
  * D eliminated next → again strengthens C.
  * C overtakes both A and B.
+ * Varied ballot depths.
  */
 const comebackFromThird: DemoScenario = {
   name: 'Comeback from Third Position',
@@ -115,26 +118,26 @@ const comebackFromThird: DemoScenario = {
   ballots: [
     // A-first voters (5) — some have C in second
     ['A', 'C', 'B', 'D', 'E', 'F'],
-    ['A', 'B', 'C', 'D', 'E', 'F'],
-    ['A', 'C', 'D', 'B', 'E', 'F'],
+    ['A', 'B', 'C'],
+    ['A', 'C', 'D', 'B'],
     ['A', 'B', 'D', 'C', 'E', 'F'],
-    ['A', 'D', 'C', 'B', 'E', 'F'],
+    ['A', 'D', 'C'],
     // B-first voters (4) — some have C in second
     ['B', 'C', 'A', 'D', 'E', 'F'],
-    ['B', 'A', 'C', 'D', 'E', 'F'],
-    ['B', 'C', 'D', 'A', 'E', 'F'],
-    ['B', 'C', 'A', 'D', 'E', 'F'],
+    ['B', 'A', 'C'],
+    ['B', 'C', 'D', 'A'],
+    ['B', 'C', 'A'],
     // C-first voters (3) — modest first support
-    ['C', 'A', 'B', 'D', 'E', 'F'],
-    ['C', 'B', 'A', 'D', 'E', 'F'],
-    ['C', 'D', 'A', 'B', 'E', 'F'],
+    ['C', 'A', 'B', 'D'],
+    ['C', 'B', 'A'],
+    ['C', 'D', 'A', 'B'],
     // D-first voters (2) — redistribute to C
-    ['D', 'C', 'A', 'B', 'E', 'F'],
-    ['D', 'C', 'B', 'A', 'E', 'F'],
+    ['D', 'C', 'A', 'B'],
+    ['D', 'C'],
     // E-first voter (1) — redistributes to C
-    ['E', 'C', 'D', 'A', 'B', 'F'],
+    ['E', 'C', 'D'],
     // F-first voter (1) — redistributes to C
-    ['F', 'C', 'D', 'A', 'B', 'E'],
+    ['F', 'C', 'D', 'A'],
   ],
   teachableMoment: 'Highlights how layered preferences matter more than top-line position. C was rarely anyone\'s first choice, but was nearly everyone\'s second or third — making it the true consensus.',
 }
