@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import { subscribeToRound } from '@/lib/realtime'
@@ -11,6 +11,12 @@ export default function WaitingPage() {
   const router = useRouter()
   const roundId = params.roundId as string
   const [showProcessing, setShowProcessing] = useState(false)
+  const showProcessingRef = useRef(false)
+
+  // Keep ref in sync so the realtime callback always sees latest value
+  useEffect(() => {
+    showProcessingRef.current = showProcessing
+  }, [showProcessing])
 
   useEffect(() => {
     async function fetchSettings() {
@@ -19,6 +25,7 @@ export default function WaitingPage() {
         const data = await res.json()
         const settings = data.settings as RoundSettings
         const sp = settings?.show_processing ?? false
+        showProcessingRef.current = sp
         setShowProcessing(sp)
 
         // Handle case where status already transitioned before page loaded
@@ -26,6 +33,8 @@ export default function WaitingPage() {
           router.push(`/round/${roundId}/processing`)
         } else if (data.status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
+        } else if (data.status === 'closed') {
+          // Processing already finished, wait for reveal
         }
       }
     }
@@ -35,14 +44,14 @@ export default function WaitingPage() {
   useEffect(() => {
     return subscribeToRound(roundId, {
       onStatusChange: (status) => {
-        if (status === 'processing' && showProcessing) {
+        if (status === 'processing' && showProcessingRef.current) {
           router.push(`/round/${roundId}/processing`)
         } else if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
         }
       },
     })
-  }, [roundId, router, showProcessing])
+  }, [roundId, router])
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4">

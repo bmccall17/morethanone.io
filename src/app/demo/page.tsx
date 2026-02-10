@@ -36,17 +36,10 @@ export default function DemoPage() {
     setRoundNumber(r => Math.min(totalRounds, r + 1))
   }
 
-  // Pick a subset of participants for the card grid (up to 8)
+  // Show all participants
   const displayParticipants = useMemo(() => {
-    const count = Math.min(scenario.participants.length, 8)
-    // Spread evenly through the ballot set for visual variety
-    const step = scenario.participants.length / count
-    const indices: number[] = []
-    for (let i = 0; i < count; i++) {
-      indices.push(Math.floor(i * step))
-    }
-    return indices.map(i => ({
-      name: scenario.participants[i],
+    return scenario.participants.map((name, i) => ({
+      name,
       ballot: scenario.ballots[i],
     }))
   }, [scenario])
@@ -156,9 +149,9 @@ export default function DemoPage() {
           {/* Right: Mock participant grid */}
           <div className="lg:col-span-3">
             <p className="text-xs font-medium text-gray-500 mb-3">
-              Participant perspectives ({scenario.ballots.length} voters, showing {displayParticipants.length})
+              Participant perspectives ({displayParticipants.length} voters)
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {displayParticipants.map(p => (
                 <MockParticipantCard
                   key={p.name}

@@ -46,3 +46,9 @@ Instead, you’ll get fewer prompts with scoped language:
   “update SHIPLOG.md only”
   “read files referenced in this PR”
 
+desired behavior:
+  Repo-level trust
+  Path manifests
+  Expiring but persistent grants
+  A visible “granted access” panel
+
