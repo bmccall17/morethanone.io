@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import RevealAnimation from '@/components/RevealAnimation'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
@@ -43,6 +44,8 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
   const [result, setResult] = useState<ResultData | null>(null)
   const [ballots, setBallots] = useState<Ballot[]>([])
   const [options, setOptions] = useState<string[]>([])
+  const [animationComplete, setAnimationComplete] = useState(false)
+  const [revealLoading, setRevealLoading] = useState(false)
   const processTriggered = useRef(false)
 
   // Fetch result data
@@ -122,6 +125,21 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundId, redirectOnReveal, router])
 
+  async function handleReveal() {
+    setRevealLoading(true)
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/reveal`, {
+        method: 'POST',
+        headers: getHostHeaders(roundId),
+      })
+      if (res.ok) {
+        router.push(redirectOnReveal)
+      }
+    } finally {
+      setRevealLoading(false)
+    }
+  }
+
   // Build ConvergeResult for RevealAnimation
   const convergeResult: ConvergeResult | null =
     result && rounds.length > 0
@@ -148,7 +166,7 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
         {convergeResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
-              <RevealAnimation result={convergeResult} showStepButton={showStepButton} />
+              <RevealAnimation result={convergeResult} showStepButton={showStepButton} onComplete={() => setAnimationComplete(true)} />
             </Card>
             {ballots.length > 0 && options.length > 0 && (
               <Card>
@@ -157,7 +175,17 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
               </Card>
             )}
           </div>
-        ) : (
+        ) : null}
+
+        {triggerProcess && animationComplete && (
+          <div className="text-center">
+            <Button size="lg" onClick={handleReveal} loading={revealLoading}>
+              Reveal result
+            </Button>
+          </div>
+        )}
+
+        {!convergeResult && (
           <Card padding="lg">
             <div className="space-y-3 text-center">
               <div className="flex justify-center">
