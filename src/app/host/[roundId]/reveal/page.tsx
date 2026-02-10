@@ -1,15 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import html2canvas from 'html2canvas'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import WinnerCard from '@/components/WinnerCard'
 import EliminationTable from '@/components/EliminationTable'
 import ResultSummary from '@/components/ResultSummary'
 import RevealAnimation from '@/components/RevealAnimation'
-import ResultCard from '@/components/ResultCard'
 import { RoundData as EliminationRound } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
 
@@ -26,6 +24,7 @@ interface ResultData {
     winning_percentage: number
   }
   tie_break_info: string | null
+  share_url?: string
 }
 
 export default function HostReveal() {
@@ -37,16 +36,15 @@ export default function HostReveal() {
   const [round, setRound] = useState<{ prompt: string; options: string[]; description: string | null } | null>(null)
   const [loading, setLoading] = useState(true)
   const [animationComplete, setAnimationComplete] = useState(false)
-  const resultCardRef = useRef<HTMLDivElement>(null)
+  const [copied, setCopied] = useState(false)
 
-  const handleShareResult = useCallback(async () => {
-    if (!resultCardRef.current) return
-    const canvas = await html2canvas(resultCardRef.current, { scale: 2 })
-    const link = document.createElement('a')
-    link.download = 'morethanone-result.png'
-    link.href = canvas.toDataURL('image/png')
-    link.click()
-  }, [])
+  const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
+
+  const handleCopyShareUrl = async () => {
+    await navigator.clipboard.writeText(shareUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -124,6 +122,14 @@ export default function HostReveal() {
               </Card>
             )}
 
+            <Card>
+              <p className="text-xs text-gray-500 mb-2">Share this result</p>
+              <p className="text-sm text-gray-700 font-mono break-all mb-3">{shareUrl}</p>
+              <Button size="lg" variant="secondary" className="w-full" onClick={handleCopyShareUrl}>
+                {copied ? 'Copied!' : 'Share Results'}
+              </Button>
+            </Card>
+
             <div className="flex gap-3">
               <Button
                 size="lg"
@@ -140,27 +146,10 @@ export default function HostReveal() {
               >
                 Run it again
               </Button>
-              <Button size="lg" variant="secondary" onClick={handleShareResult}>
-                Share result
-              </Button>
             </div>
           </>
         )}
       </div>
-
-      {/* Hidden ResultCard for html2canvas capture */}
-      {result && round && (
-        <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-          <ResultCard
-            ref={resultCardRef}
-            prompt={round.prompt}
-            winner={result.winner}
-            totalParticipants={result.total_active}
-            totalRounds={result.summary.total_rounds}
-            winningPercentage={result.summary.winning_percentage}
-          />
-        </div>
-      )}
     </main>
   )
 }

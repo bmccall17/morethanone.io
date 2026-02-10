@@ -56,6 +56,9 @@ export async function POST(
   })
 
   // Store result
+  const origin = new URL(request.url).origin
+  const share_url = `${origin}/results/${roundId}`
+
   const { error: resultError } = await supabase
     .from('results')
     .upsert({
@@ -68,6 +71,7 @@ export async function POST(
         ? result.tie_breaks.map(tb => tb.detail).join('; ')
         : null,
       summary: result.summary,
+      share_url,
     }, { onConflict: 'round_id' })
 
   if (resultError) {

@@ -46,6 +46,7 @@ export interface Result {
   processing_data: RoundData[]
   tie_break_info: string | null
   summary: ResultSummary
+  share_url?: string
   computed_at: string
 }
 

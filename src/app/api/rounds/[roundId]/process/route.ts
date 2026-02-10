@@ -67,6 +67,10 @@ export async function POST(
     seed: roundId,
   })
 
+  // Compute share URL
+  const origin = new URL(request.url).origin
+  const share_url = `${origin}/results/${roundId}`
+
   // Step through each round incrementally, storing and broadcasting
   for (let i = 0; i < result.rounds.length; i++) {
     const processingRounds = result.rounds.slice(0, i + 1)
@@ -86,6 +90,7 @@ export async function POST(
           ? result.tie_breaks.map(tb => tb.detail).join('; ')
           : null,
         summary: result.summary,
+        share_url,
       }, { onConflict: 'round_id' })
 
     if (resultError) {
