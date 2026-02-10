@@ -72,7 +72,14 @@ export async function POST(
   const share_url = `${origin}/results/${roundId}`
 
   // Step through each round incrementally, storing and broadcasting
+  // Delay between rounds so realtime events propagate to participants
+  const ROUND_DELAY_MS = 1500
+
   for (let i = 0; i < result.rounds.length; i++) {
+    if (i > 0) {
+      await new Promise(resolve => setTimeout(resolve, ROUND_DELAY_MS))
+    }
+
     const processingRounds = result.rounds.slice(0, i + 1)
     const currentRoundNumber = i + 1
 

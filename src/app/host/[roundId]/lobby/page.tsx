@@ -166,12 +166,6 @@ export default function HostLobby() {
         const data = await res.json()
         throw new Error(data.error)
       }
-      const data = await res.json()
-      // If show_processing is enabled, auto-trigger the process API
-      if (data.status === 'processing') {
-        setRound((prev) => prev ? { ...prev, status: 'processing' } : prev)
-        await handleProcess()
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {

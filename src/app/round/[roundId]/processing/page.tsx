@@ -31,6 +31,7 @@ export default function ProcessingPage() {
   const [processingRound, setProcessingRound] = useState(0)
   const [rounds, setRounds] = useState<RoundData[]>([])
   const [result, setResult] = useState<ResultData | null>(null)
+  const [processingDone, setProcessingDone] = useState(false)
 
   // Subscribe to processing round updates and do initial fetch
   useEffect(() => {
@@ -45,8 +46,23 @@ export default function ProcessingPage() {
       }
     }
 
+    // Check current round status to catch up if processing already finished
+    async function checkStatus() {
+      const res = await fetch(`/api/rounds/${roundId}`)
+      if (res.ok && !cancelled) {
+        const data = await res.json()
+        if (data.status === 'closed') {
+          setProcessingDone(true)
+          fetchResult()
+        } else if (data.status === 'revealed') {
+          router.push(`/round/${roundId}/reveal`)
+        }
+      }
+    }
+
     // Catch up with any processing that already happened
     fetchResult()
+    checkStatus()
 
     const unsubscribe = subscribeToProcessing(roundId, {
       onProcessingUpdate: (roundNumber: number) => {
@@ -59,13 +75,24 @@ export default function ProcessingPage() {
       cancelled = true
       unsubscribe()
     }
-  }, [roundId])
+  }, [roundId, router])
 
-  // Subscribe to round status changes for reveal transition
+  // Subscribe to round status changes for reveal transition and processing completion
   useEffect(() => {
     return subscribeToRound(roundId, {
       onStatusChange: (status) => {
-        if (status === 'revealed') {
+        if (status === 'closed') {
+          setProcessingDone(true)
+          // Fetch final result data
+          fetch(`/api/rounds/${roundId}/result`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data) {
+                setResult(data)
+                setRounds(data.processing_data ?? [])
+              }
+            })
+        } else if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
         }
       },
@@ -96,9 +123,18 @@ export default function ProcessingPage() {
         </div>
 
         {convergeResult ? (
-          <Card>
-            <RevealAnimation result={convergeResult} />
-          </Card>
+          <>
+            <Card>
+              <RevealAnimation result={convergeResult} />
+            </Card>
+            {processingDone && (
+              <Card padding="lg">
+                <p className="text-sm text-gray-500 text-center">
+                  Processing complete — waiting for host to reveal...
+                </p>
+              </Card>
+            )}
+          </>
         ) : (
           <Card padding="lg">
             <div className="space-y-3 text-center">
@@ -106,9 +142,11 @@ export default function ProcessingPage() {
                 <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
               </div>
               <p className="text-sm text-gray-500">
-                {processingRound > 0
-                  ? `Round ${processingRound} processed, loading data...`
-                  : 'Waiting for processing to begin...'}
+                {processingDone
+                  ? 'Processing complete, loading data...'
+                  : processingRound > 0
+                    ? `Round ${processingRound} processed, loading data...`
+                    : 'Waiting for processing to begin...'}
               </p>
             </div>
           </Card>
