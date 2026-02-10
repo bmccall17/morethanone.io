@@ -1,5 +1,8 @@
 export type RoundStatus = 'setup' | 'ranking' | 'processing' | 'closed' | 'revealed'
 
+export type RevealViewType = 'animation' | 'selection' | 'table'
+export interface RevealViewState { view: RevealViewType; animationRound: number }
+
 export interface RoundSettings {
   allowTies: boolean
   anonymousResults: boolean
@@ -17,6 +20,7 @@ export interface Round {
   status: RoundStatus
   host_token: string
   current_processing_round: number
+  reveal_view_state: RevealViewState
   created_at: string
 }
 

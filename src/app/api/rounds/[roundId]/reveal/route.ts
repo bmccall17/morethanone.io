@@ -81,7 +81,7 @@ export async function POST(
   // Update round status
   const { error: updateError } = await supabase
     .from('rounds')
-    .update({ status: 'revealed' })
+    .update({ status: 'revealed', reveal_view_state: { view: 'animation', animationRound: 1 } })
     .eq('id', roundId)
 
   if (updateError) {

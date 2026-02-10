@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import type { Participant, Ranking } from '@/types/database'
+import type { Participant, Ranking, RevealViewState } from '@/types/database'
 
 export interface RoundCallbacks {
   onStatusChange: (status: string) => void
@@ -16,6 +16,10 @@ export interface RankingCallbacks {
 
 export interface ProcessingCallbacks {
   onProcessingUpdate: (roundNumber: number) => void
+}
+
+export interface RevealViewCallbacks {
+  onRevealViewChange: (state: RevealViewState) => void
 }
 
 export function subscribeToRound(
@@ -136,6 +140,37 @@ export function subscribeToProcessing(
         const oldRound = payload.old.current_processing_round
         if (newRound !== oldRound) {
           callbacks.onProcessingUpdate(newRound)
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}
+
+export function subscribeToRevealView(
+  roundId: string,
+  callbacks: RevealViewCallbacks
+): () => void {
+  const supabase = createClient()
+
+  const channel: RealtimeChannel = supabase
+    .channel(`reveal-view:${roundId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'rounds',
+        filter: `id=eq.${roundId}`,
+      },
+      (payload) => {
+        const newState = payload.new.reveal_view_state
+        const oldState = payload.old.reveal_view_state
+        if (JSON.stringify(newState) !== JSON.stringify(oldState)) {
+          callbacks.onRevealViewChange(newState as RevealViewState)
         }
       }
     )

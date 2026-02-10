@@ -5,10 +5,12 @@ import { useParams } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import WinnerCard from '@/components/WinnerCard'
-import EliminationTable from '@/components/EliminationTable'
-import ResultSummary from '@/components/ResultSummary'
-import RevealAnimation from '@/components/RevealAnimation'
+import AnimationView from '@/components/reveal/AnimationView'
+import SelectionGridView from '@/components/reveal/SelectionGridView'
+import FullResultsTableView from '@/components/reveal/FullResultsTableView'
+import { subscribeToRevealView } from '@/lib/realtime'
 import { RoundData as EliminationRound } from '@/types/database'
+import type { RevealViewState } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
 
 interface ResultData {
@@ -27,15 +29,21 @@ interface ResultData {
   share_url?: string
 }
 
+interface BallotData {
+  displayName: string
+  ranking: string[]
+}
+
 export default function PlayerReveal() {
   const params = useParams()
   const roundId = params.roundId as string
 
   const [result, setResult] = useState<ResultData | null>(null)
-  const [round, setRound] = useState<{ prompt: string } | null>(null)
+  const [round, setRound] = useState<{ prompt: string; options: string[] } | null>(null)
+  const [ballots, setBallots] = useState<BallotData[]>([])
   const [loading, setLoading] = useState(true)
-  const [animationComplete, setAnimationComplete] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
 
@@ -47,16 +55,32 @@ export default function PlayerReveal() {
 
   useEffect(() => {
     async function fetchData() {
-      const [resultRes, roundRes] = await Promise.all([
+      const [resultRes, roundRes, ballotsRes] = await Promise.all([
         fetch(`/api/rounds/${roundId}/result`),
         fetch(`/api/rounds/${roundId}`),
+        fetch(`/api/rounds/${roundId}/ballots`),
       ])
 
       if (resultRes.ok) setResult(await resultRes.json())
-      if (roundRes.ok) setRound(await roundRes.json())
+      if (roundRes.ok) {
+        const roundData = await roundRes.json()
+        setRound(roundData)
+        if (roundData.reveal_view_state) {
+          setViewState(roundData.reveal_view_state)
+        }
+      }
+      if (ballotsRes.ok) setBallots(await ballotsRes.json())
       setLoading(false)
     }
     fetchData()
+  }, [roundId])
+
+  // Subscribe to host's view changes
+  useEffect(() => {
+    const unsubscribe = subscribeToRevealView(roundId, {
+      onRevealViewChange: (state) => setViewState(state),
+    })
+    return unsubscribe
   }, [roundId])
 
   if (loading) {
@@ -84,51 +108,57 @@ export default function PlayerReveal() {
     summary: result.summary,
   }
 
+  const options = round?.options || []
+
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6">
         {round && (
           <h1 className="text-xl font-bold text-gray-900 text-center">{round.prompt}</h1>
         )}
 
-        {!animationComplete ? (
-          <Card>
-            <RevealAnimation
-              result={convergeResult}
-              onComplete={() => setAnimationComplete(true)}
-            />
-          </Card>
-        ) : (
-          <>
-            <WinnerCard
-              winner={result.winner}
-              percentage={result.summary.winning_percentage}
-              totalRounds={result.summary.total_rounds}
-            />
-
-            <Card>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Round by round</h3>
-              <EliminationTable rounds={result.rounds_data} />
-            </Card>
-
-            <ResultSummary text={result.summary.text} />
-
-            {result.tie_break_info && (
-              <Card>
-                <p className="text-xs text-gray-500">
-                  <span className="font-medium">Tie-break:</span> {result.tie_break_info}
-                </p>
-              </Card>
-            )}
-            <Card>
-              <p className="text-xs text-gray-500 mb-2">Share this result</p>
-              <p className="text-sm text-gray-700 font-mono break-all mb-3">{shareUrl}</p>
-              <Button size="lg" variant="secondary" className="w-full" onClick={handleCopyShareUrl}>
-                {copied ? 'Copied!' : 'Share Results'}
-              </Button>
-            </Card>
-          </>
+        {viewState.view === 'animation' && (
+          <AnimationView
+            result={convergeResult}
+            currentRound={viewState.animationRound}
+            onRoundChange={() => {}} // read-only for participants
+            options={options}
+          />
         )}
+
+        {viewState.view === 'selection' && (
+          <SelectionGridView ballots={ballots} options={options} />
+        )}
+
+        {viewState.view === 'table' && (
+          <FullResultsTableView
+            rounds={result.rounds_data}
+            winner={result.winner}
+            options={options}
+          />
+        )}
+
+        <WinnerCard
+          winner={result.winner}
+          percentage={result.summary.winning_percentage}
+          totalRounds={result.summary.total_rounds}
+        />
+
+        {result.tie_break_info && (
+          <Card>
+            <p className="text-xs text-gray-500">
+              <span className="font-medium">Tie-break:</span> {result.tie_break_info}
+            </p>
+          </Card>
+        )}
+
+        <Card>
+          <p className="text-xs text-gray-500 mb-2">Share this result</p>
+          <p className="text-sm text-gray-700 font-mono break-all mb-3">{shareUrl}</p>
+          <Button size="lg" variant="secondary" className="w-full" onClick={handleCopyShareUrl}>
+            {copied ? 'Copied!' : 'Share Results'}
+          </Button>
+        </Card>
       </div>
     </main>
   )
