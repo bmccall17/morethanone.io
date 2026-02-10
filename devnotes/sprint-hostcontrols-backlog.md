@@ -24,21 +24,28 @@
 
 - [x] Add a realtime subscription helper `subscribeToProcessing(roundId, callbacks)` in `src/lib/realtime.ts` that listens for UPDATE events on the `rounds` table and calls `onProcessingUpdate(roundNumber)` when `current_processing_round` changes. Participants use this to know when new round data is available to fetch and display.
 
-- [ ] Create a participant processing view at `src/app/round/[roundId]/processing/page.tsx`. When `show_processing` is enabled and round status is `processing`, redirect participants here from the waiting page. This page subscribes to processing updates via `subscribeToProcessing()` and fetches each round's data as it becomes available. Display the round-by-round results using the existing `RevealAnimation` component from `src/components/RevealAnimation.tsx`, advancing one round at a time as data arrives. When processing completes (status changes to `revealed`), show the full results.
+- [x] Create a participant processing view at `src/app/round/[roundId]/processing/page.tsx`. When `show_processing` is enabled and round status is `processing`, redirect participants here from the waiting page. This page subscribes to processing updates via `subscribeToProcessing()` and fetches each round's data as it becomes available. Display the round-by-round results using the existing `RevealAnimation` component from `src/components/RevealAnimation.tsx`, advancing one round at a time as data arrives. When processing completes (status changes to `closed`), shows "Processing complete — waiting for host to reveal..." then redirects on `revealed`. **Bug fix:** added `'closed'` status handling, initial status check on mount, and 1.5s delay between rounds in process API for realtime propagation.
 
-- [ ] Update the participant waiting page at `src/app/round/[roundId]/waiting/page.tsx` to check the round's `show_processing` setting. If enabled and status changes to `processing`, redirect to the new `/round/[roundId]/processing` page. If disabled, keep existing behavior (wait for `revealed` status then redirect to reveal page).
+- [x] Update the participant waiting page at `src/app/round/[roundId]/waiting/page.tsx` to check the round's `show_processing` setting. If enabled and status changes to `processing`, redirect to the new `/round/[roundId]/processing` page. If disabled, keep existing behavior (wait for `revealed` status then redirect to reveal page). **Bug fix:** added initial status check on mount so participants who load after status already changed still redirect correctly.
+
+**Bug fixes applied during this sprint:**
+- `supabase/migrations/fix_status_check_constraint.sql` — `rounds_status_check` constraint now allows `'processing'` and `'revealed'` statuses.
+- Host lobby: added `'processing'` badge, "Run processing" button for processing state. Removed auto-trigger of process API from close handler to give participants time to navigate.
+- Process API: added 1.5s delay between round iterations so realtime events propagate to participants.
 
 ## 3. share results flow
 
-- [ ] Create a shareable results page at `src/app/results/[roundId]/page.tsx`. This is a public page (no auth required) that fetches the round result via `GET /api/rounds/[roundId]/result` and displays the winner, round-by-round elimination table, and result summary using existing components (`WinnerCard`, `EliminationTable`, `ResultSummary` from `src/components/`). Include the round prompt as a heading. This page should work as a standalone link.
+- [x] Create a shareable results page at `src/app/results/[roundId]/page.tsx`. This is a public page (no auth required) that fetches the round result via `GET /api/rounds/[roundId]/result` and displays the winner, round-by-round elimination table, and result summary using existing components (`WinnerCard`, `EliminationTable`, `ResultSummary` from `src/components/`). Include the round prompt as a heading. This page should work as a standalone link.
 
-- [ ] Add a `share_url` field to the `Result` type in `src/types/database.ts`. When the host clicks "Share results" on the reveal page, generate the URL as `{origin}/results/{roundId}` and store it in the result row. Update `src/app/api/rounds/[roundId]/reveal/route.ts` to save this URL when creating the result record.
+- [x] Add a `share_url` field to the `Result` type in `src/types/database.ts`. Generate the URL as `{origin}/results/{roundId}` and store it in the result row at computation time. Updated both `src/app/api/rounds/[roundId]/reveal/route.ts` and `src/app/api/rounds/[roundId]/process/route.ts` to save `share_url` when upserting results. Migration: `supabase/migrations/add_share_url_column.sql`.
 
-- [ ] Replace the current "Share result" PNG download button on the host reveal page at `src/app/host/[roundId]/reveal/page.tsx` with a "Share Results" button that: (1) copies the shareable URL to clipboard with a toast/confirmation, and (2) triggers the status change to `revealed` so participants are notified. Show the shareable URL as visible text next to the copy button.
+- [x] Replace the current "Share result" PNG download button on the host reveal page at `src/app/host/[roundId]/reveal/page.tsx` with a "Share Results" clipboard copy button. Removed `html2canvas`, `ResultCard`, and hidden capture div. Shows the shareable URL as visible text with a "Share Results" / "Copied!" toggle button.
 
-- [ ] Update the participant reveal page at `src/app/round/[roundId]/reveal/page.tsx` to display the shareable results URL. Show it as a copyable link at the bottom of the results view so participants can share it after the session.
+- [x] Update the participant reveal page at `src/app/round/[roundId]/reveal/page.tsx` to display the shareable results URL. Same cleanup (removed `html2canvas`, `ResultCard`, hidden div). Shows copyable link with "Share Results" / "Copied!" button at the bottom of the results view.
 
-## 4. demo mode
+## 4. demo mode (deferred to separate sprint)
+
+> **Deferred:** Demo mode is being built in a separate sprint. Sections 1-3 are complete and shipped as v0.0.3.
 
 - [ ] Create demo scenario data at `src/lib/demo/scenarios.ts`. Export three scenario objects, each containing: `name`, `description`, `options` (string array), `ballots` (array of ranking arrays representing mock participants), and `teachableMoment` (string). Scenario 1: "Early Leader, Late Overtake" with 5 options (A-E), 15 ballots where A leads in first preferences but C wins via redistributed secondary preferences from E and B. Scenario 2: "Polarizing Favorite vs Steady Consensus" with 4 options (A-D), 12 ballots where A has most firsts but B wins via consensus. Scenario 3: "Comeback from Third" with 6 options (A-F), 18 ballots where C starts third but wins via layered preferences. Each ballot set must produce the described outcome when run through the `converge()` engine.
 
