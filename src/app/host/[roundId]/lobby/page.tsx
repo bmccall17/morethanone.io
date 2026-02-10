@@ -134,6 +134,26 @@ export default function HostLobby() {
     }
   }
 
+  async function handleProcess() {
+    setActionLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/process`, {
+        method: 'POST',
+        headers: getHostHeaders(roundId),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+      // Process API transitions status to 'closed', which comes via realtime
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   async function handleClose() {
     setActionLoading(true)
     setError('')
@@ -145,6 +165,12 @@ export default function HostLobby() {
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error)
+      }
+      const data = await res.json()
+      // If show_processing is enabled, auto-trigger the process API
+      if (data.status === 'processing') {
+        setRound((prev) => prev ? { ...prev, status: 'processing' } : prev)
+        await handleProcess()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
@@ -262,6 +288,7 @@ export default function HostLobby() {
   const statusBadge = {
     setup: <Badge variant="info">Setup</Badge>,
     ranking: <Badge variant="warning">Ranking</Badge>,
+    processing: <Badge variant="warning">Processing</Badge>,
     closed: <Badge variant="default">Closed</Badge>,
     revealed: <Badge variant="success">Revealed</Badge>,
   }[round.status] || <Badge>{round.status}</Badge>
@@ -354,6 +381,16 @@ export default function HostLobby() {
               loading={actionLoading}
             >
               Close ranking
+            </Button>
+          )}
+          {round.status === 'processing' && (
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={handleProcess}
+              loading={actionLoading}
+            >
+              {actionLoading ? 'Processing...' : 'Run processing'}
             </Button>
           )}
           {round.status === 'closed' && (

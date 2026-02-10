@@ -18,11 +18,19 @@ export default function WaitingPage() {
       if (res.ok) {
         const data = await res.json()
         const settings = data.settings as RoundSettings
-        setShowProcessing(settings?.show_processing ?? false)
+        const sp = settings?.show_processing ?? false
+        setShowProcessing(sp)
+
+        // Handle case where status already transitioned before page loaded
+        if (data.status === 'processing' && sp) {
+          router.push(`/round/${roundId}/processing`)
+        } else if (data.status === 'revealed') {
+          router.push(`/round/${roundId}/reveal`)
+        }
       }
     }
     fetchSettings()
-  }, [roundId])
+  }, [roundId, router])
 
   useEffect(() => {
     return subscribeToRound(roundId, {
