@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import WinnerCard from '@/components/WinnerCard'
+import RevealCountdown from '@/components/RevealCountdown'
 import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
 import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
@@ -44,6 +45,7 @@ export default function HostReveal() {
   const [ballots, setBallots] = useState<BallotData[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [countdownComplete, setCountdownComplete] = useState(false)
   const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
@@ -128,6 +130,10 @@ export default function HostReveal() {
   }
 
   const options = round?.options || []
+
+  if (!countdownComplete) {
+    return <RevealCountdown onComplete={() => setCountdownComplete(true)} />
+  }
 
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
