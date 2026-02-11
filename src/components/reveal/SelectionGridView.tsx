@@ -1,23 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import { getOptionColor } from '@/lib/colors'
 import type { ConvergeRound } from '@/lib/engine/types'
-
-// Stable color palette for distinguishing options
-const OPTION_COLORS = [
-  { bg: 'bg-orange-400', text: 'text-gray-900' },
-  { bg: 'bg-indigo-400', text: 'text-white' },
-  { bg: 'bg-emerald-400', text: 'text-gray-900' },
-  { bg: 'bg-rose-400', text: 'text-white' },
-  { bg: 'bg-cyan-400', text: 'text-gray-900' },
-  { bg: 'bg-amber-400', text: 'text-gray-900' },
-  { bg: 'bg-violet-400', text: 'text-white' },
-  { bg: 'bg-lime-400', text: 'text-gray-900' },
-  { bg: 'bg-pink-400', text: 'text-white' },
-  { bg: 'bg-teal-400', text: 'text-gray-900' },
-  { bg: 'bg-sky-400', text: 'text-gray-900' },
-  { bg: 'bg-fuchsia-400', text: 'text-white' },
-]
 
 interface SelectionGridViewProps {
   ballots: { displayName: string; ranking: string[] }[]
@@ -38,11 +23,11 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
     return `${n}th`
   })
 
-  // Map each option to a stable color
+  // Map each option to a stable color from shared palette
   const optionColorMap = useMemo(() => {
-    const map: Record<string, { bg: string; text: string }> = {}
+    const map: Record<string, { hex: string; text: string }> = {}
     options.forEach((opt, i) => {
-      map[opt] = OPTION_COLORS[i % OPTION_COLORS.length]
+      map[opt] = getOptionColor(i)
     })
     return map
   }, [options])
@@ -69,9 +54,10 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
           return (
             <span
               key={opt}
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-opacity duration-500 ${color.bg} ${color.text} ${
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-opacity duration-500 ${color.text} ${
                 isEliminated ? 'opacity-30 line-through' : ''
               }`}
+              style={{ backgroundColor: color.hex }}
             >
               {opt}
             </span>
@@ -115,11 +101,12 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold leading-none transition-all duration-500 ${
                               isEliminated
-                                ? 'bg-gray-700 text-gray-500 opacity-40'
+                                ? 'text-gray-500 opacity-40'
                                 : isActive
-                                  ? `${color.bg} ${color.text} ring-2 ring-white scale-110`
-                                  : `${color.bg} ${color.text}`
+                                  ? `${color.text} ring-2 ring-white scale-110`
+                                  : color.text
                             }`}
+                            style={{ backgroundColor: isEliminated ? '#374151' : color.hex }}
                             title={rankedOption}
                           >
                             {rankedOption.length <= 3 ? rankedOption : rankedOption.slice(0, 2)}

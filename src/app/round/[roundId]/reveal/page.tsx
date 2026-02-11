@@ -125,7 +125,7 @@ export default function PlayerReveal() {
             {/* Left: Tally bars + round indicator */}
             <div className="lg:col-span-2 space-y-4">
               <Card>
-                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} />
+                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} options={options} />
               </Card>
 
               {/* Round indicator (read-only for participants) */}

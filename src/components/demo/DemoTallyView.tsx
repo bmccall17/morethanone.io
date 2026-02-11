@@ -1,32 +1,19 @@
 'use client'
 
 import { useMemo } from 'react'
+import { getOptionColor } from '@/lib/colors'
 import type { ConvergeResult, ConvergeRound } from '@/lib/engine/types'
 
 interface DemoTallyViewProps {
   result: ConvergeResult
   /** 1-indexed current round number */
   roundNumber: number
+  /** Canonical option list for stable color mapping (shared with SelectionGridView) */
+  options?: string[]
 }
 
-// Hex colors for provenance segments — one per option position
-const OPTION_HEX = [
-  '#818cf8', // indigo-400
-  '#34d399', // emerald-400
-  '#22d3ee', // cyan-400
-  '#fbbf24', // amber-400
-  '#fb7185', // rose-400
-  '#a78bfa', // violet-400
-  '#f472b6', // pink-400
-  '#2dd4bf', // teal-400
-  '#f59e0b', // amber-500
-  '#6366f1', // indigo-500
-  '#10b981', // emerald-500
-  '#ec4899', // pink-500
-]
-
 function getColor(index: number): string {
-  return OPTION_HEX[index % OPTION_HEX.length]
+  return getOptionColor(index).hex
 }
 
 /**
@@ -69,10 +56,10 @@ function computeProvenance(
   return prov
 }
 
-export default function DemoTallyView({ result, roundNumber }: DemoTallyViewProps) {
+export default function DemoTallyView({ result, roundNumber, options }: DemoTallyViewProps) {
   const { rounds, winner } = result
 
-  // Stable option order from all rounds
+  // Stable option order from all rounds (for display)
   const allOptions = useMemo(() => {
     const opts = new Set<string>()
     for (const round of rounds) {
@@ -81,12 +68,13 @@ export default function DemoTallyView({ result, roundNumber }: DemoTallyViewProp
     return [...opts]
   }, [rounds])
 
-  // Color index lookup
+  // Color index lookup — use canonical options prop when available for consistency with SelectionGridView
   const colorIndex = useMemo(() => {
     const map: Record<string, number> = {}
-    allOptions.forEach((opt, i) => { map[opt] = i })
+    const colorSource = options || allOptions
+    colorSource.forEach((opt, i) => { map[opt] = i })
     return map
-  }, [allOptions])
+  }, [options, allOptions])
 
   const maxTally = useMemo(() => {
     let max = 0

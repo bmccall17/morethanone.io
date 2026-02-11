@@ -143,7 +143,7 @@ export default function HostReveal() {
             {/* Left: Tally bars + round controls */}
             <div className="lg:col-span-2 space-y-4">
               <Card>
-                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} />
+                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} options={options} />
               </Card>
 
               {/* Step controls */}

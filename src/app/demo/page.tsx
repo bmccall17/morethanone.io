@@ -101,7 +101,7 @@ export default function DemoPage() {
           {/* Left: Host control panel */}
           <div className="lg:col-span-2 space-y-4">
             <Card>
-              <DemoTallyView result={runner.result} roundNumber={roundNumber} />
+              <DemoTallyView result={runner.result} roundNumber={roundNumber} options={scenario.options} />
             </Card>
 
             {/* Step controls */}
