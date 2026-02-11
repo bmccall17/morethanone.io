@@ -76,6 +76,9 @@ export default function HostLobby() {
           return [...prev, { id: participant.id, display_name: participant.display_name }]
         })
       },
+      onPlayerRemoved: (participant) => {
+        setPlayers((prev) => prev.filter((p) => p.id !== participant.id))
+      },
     })
   }, [roundId])
 
@@ -332,7 +335,12 @@ export default function HostLobby() {
               <p className="text-sm text-gray-500">participant{players.length !== 1 ? 's' : ''} joined</p>
             </div>
           ) : (
-            <PlayerList players={players} />
+            <PlayerList
+              players={players}
+              roundId={roundId}
+              isHost={!!hostToken}
+              roundStatus={round.status}
+            />
           )}
         </Card>
 

@@ -8,6 +8,7 @@ export interface RoundCallbacks {
 
 export interface ParticipantCallbacks {
   onPlayerJoined: (participant: Participant) => void
+  onPlayerRemoved?: (participant: Participant) => void
 }
 
 export interface RankingCallbacks {
@@ -71,6 +72,21 @@ export function subscribeToParticipants(
       },
       (payload) => {
         callbacks.onPlayerJoined(payload.new as Participant)
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'participants',
+        filter: `round_id=eq.${roundId}`,
+      },
+      (payload) => {
+        const participant = payload.new as Participant
+        if (participant.removed && callbacks.onPlayerRemoved) {
+          callbacks.onPlayerRemoved(participant)
+        }
       }
     )
     .subscribe()
