@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import type { RoundSettings } from '@/types/database'
 
 export async function POST(
   request: Request,
@@ -19,7 +20,7 @@ export async function POST(
     // Verify round is in ranking status
     const { data: round, error: roundError } = await supabase
       .from('rounds')
-      .select('status, options')
+      .select('status, options, settings')
       .eq('id', roundId)
       .single()
 
@@ -29,6 +30,14 @@ export async function POST(
 
     if (round.status !== 'ranking') {
       return NextResponse.json({ error: 'Round is not accepting rankings' }, { status: 400 })
+    }
+
+    const settings = round.settings as RoundSettings | null
+    if (settings?.max_ranks && ranking.length > settings.max_ranks) {
+      return NextResponse.json(
+        { error: `Rankings exceed the maximum of ${settings.max_ranks}` },
+        { status: 400 }
+      )
     }
 
     // Verify participant exists and belongs to this round

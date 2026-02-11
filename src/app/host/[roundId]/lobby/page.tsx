@@ -20,7 +20,7 @@ interface RoundData {
   prompt: string
   description: string | null
   options: string[]
-  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean; bot_count: number; timer_minutes?: number }
+  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean; bot_count: number; timer_minutes?: number; max_ranks?: number }
   status: string
   ranking_started_at: string | null
 }
@@ -426,6 +426,7 @@ export default function HostLobby() {
                 options={round.options}
                 onSubmit={handleHostSubmitRanking}
                 loading={submitLoading}
+                maxRanks={round.settings?.max_ranks}
               />
             )}
           </Card>

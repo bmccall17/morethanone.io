@@ -24,6 +24,7 @@ interface DraggableRankListProps {
   options: string[]
   onSubmit: (ranking: string[]) => void
   loading?: boolean
+  maxRanks?: number
 }
 
 function SortableItem({ id, index, ruledOut }: { id: string; index: number; ruledOut?: boolean }) {
@@ -78,9 +79,14 @@ function DroppableZone({ id, children }: { id: string; children: React.ReactNode
   return <div ref={setNodeRef}>{children}</div>
 }
 
-export default function DraggableRankList({ options, onSubmit, loading }: DraggableRankListProps) {
-  const [ranked, setRanked] = useState(options)
-  const [ruledOut, setRuledOut] = useState<string[]>([])
+export default function DraggableRankList({ options, onSubmit, loading, maxRanks }: DraggableRankListProps) {
+  const [ranked, setRanked] = useState(() =>
+    maxRanks && maxRanks < options.length ? options.slice(0, maxRanks) : options
+  )
+  const [ruledOut, setRuledOut] = useState<string[]>(() =>
+    maxRanks && maxRanks < options.length ? options.slice(maxRanks) : []
+  )
+  const rankedFull = !!maxRanks && ranked.length >= maxRanks
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -141,8 +147,9 @@ export default function DraggableRankList({ options, onSubmit, loading }: Dragga
       return
     }
 
-    // Cross-zone: ruled out → ranked
+    // Cross-zone: ruled out → ranked (blocked when at max)
     if (isActiveRuledOut && isOverRanked) {
+      if (rankedFull) return
       setRuledOut(prev => prev.filter(id => id !== activeId))
       if (overId === 'ranked-zone') {
         setRanked(prev => [...prev, activeId])
@@ -181,8 +188,14 @@ export default function DraggableRankList({ options, onSubmit, loading }: Dragga
           </SortableContext>
         </DroppableZone>
 
+        {maxRanks && (
+          <p className="text-xs text-indigo-600 text-center font-medium">
+            You can rank up to {maxRanks} option{maxRanks !== 1 ? 's' : ''}.
+          </p>
+        )}
+
         <p className="text-xs text-gray-400 text-center">
-          Drag to reorder. Drag below to rule out.
+          Drag to reorder.{!rankedFull && ' Drag below to rule out.'}
         </p>
 
         <button

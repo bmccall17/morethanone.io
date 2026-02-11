@@ -17,7 +17,7 @@ export default function RankPage() {
     prompt: string
     options: string[]
     status: string
-    settings?: { timer_minutes?: number }
+    settings?: { timer_minutes?: number; max_ranks?: number }
     ranking_started_at?: string | null
   } | null>(null)
   const [timerExpired, setTimerExpired] = useState(false)
@@ -162,6 +162,7 @@ export default function RankPage() {
             options={shuffledOptions}
             onSubmit={handleSubmit}
             loading={submitLoading}
+            maxRanks={round.settings?.max_ranks}
           />
         )}
       </div>

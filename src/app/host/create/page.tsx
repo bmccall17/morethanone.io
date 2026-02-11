@@ -26,6 +26,7 @@ function CreateRoundForm() {
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
   const [timerMinutes, setTimerMinutes] = useState('')
+  const [maxRanks, setMaxRanks] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -54,6 +55,7 @@ function CreateRoundForm() {
             allowTies,
             anonymousResults,
             ...(timerMinutes ? { timer_minutes: Number(timerMinutes) } : {}),
+            ...(maxRanks ? { max_ranks: Number(maxRanks) } : {}),
           },
         }),
       })
@@ -132,6 +134,22 @@ function CreateRoundForm() {
                 placeholder="No timer"
                 value={timerMinutes}
                 onChange={e => setTimerMinutes(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="max-ranks" className="block text-sm font-medium text-gray-700">
+                Max ranks (optional)
+              </label>
+              <p className="text-xs text-gray-500 mb-1">Limit how many options participants can rank (default: rank all)</p>
+              <input
+                id="max-ranks"
+                type="number"
+                min={1}
+                max={options.length || undefined}
+                placeholder="Rank all"
+                value={maxRanks}
+                onChange={e => setMaxRanks(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>

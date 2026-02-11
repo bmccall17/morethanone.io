@@ -30,11 +30,21 @@ describe('RoundSettings', () => {
     expect(withTimer.timer_minutes).toBe(5)
   })
 
+  test('max_ranks is optional and defaults to undefined', () => {
+    expect(defaultSettings.max_ranks).toBeUndefined()
+  })
+
+  test('max_ranks can be set to a number', () => {
+    const withMaxRanks: RoundSettings = { ...defaultSettings, max_ranks: 3 }
+    expect(withMaxRanks.max_ranks).toBe(3)
+  })
+
   test('all boolean settings default to false', () => {
-    const { bot_count, timer_minutes, ...booleanSettings } = defaultSettings
+    const { bot_count, timer_minutes, max_ranks, ...booleanSettings } = defaultSettings
     expect(Object.values(booleanSettings).every(v => v === false)).toBe(true)
     expect(bot_count).toBe(0)
     expect(timer_minutes).toBeUndefined()
+    expect(max_ranks).toBeUndefined()
   })
 
   test('settings object is assignable to Round.settings', () => {

@@ -10,6 +10,7 @@ export interface RoundSettings {
   show_processing: boolean
   bot_count: number
   timer_minutes?: number
+  max_ranks?: number
 }
 
 export interface Round {
