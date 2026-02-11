@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Toggle from '@/components/ui/Toggle'
 import DemoTallyView from '@/components/demo/DemoTallyView'
-import MockParticipantCard from '@/components/demo/MockParticipantCard'
+import SelectionGridView from '@/components/reveal/SelectionGridView'
 import { DemoRunner } from '@/lib/demo/engine'
 import { scenarios } from '@/lib/demo/scenarios'
 
@@ -36,11 +36,10 @@ export default function DemoPage() {
     setRoundNumber(r => Math.min(totalRounds, r + 1))
   }
 
-  // Show all participants
-  const displayParticipants = useMemo(() => {
+  const selectionBallots = useMemo(() => {
     return scenario.participants.map((name, i) => ({
-      name,
-      ballot: scenario.ballots[i],
+      displayName: name,
+      ranking: scenario.ballots[i],
     }))
   }, [scenario])
 
@@ -146,22 +145,14 @@ export default function DemoPage() {
             )}
           </div>
 
-          {/* Right: Mock participant grid */}
+          {/* Right: Selection grid */}
           <div className="lg:col-span-3">
-            <p className="text-xs font-medium text-gray-500 mb-3">
-              Participant perspectives ({displayParticipants.length} voters)
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {displayParticipants.map(p => (
-                <MockParticipantCard
-                  key={p.name}
-                  name={p.name}
-                  ballot={p.ballot}
-                  roundNumber={roundNumber}
-                  rounds={runner.result.rounds}
-                />
-              ))}
-            </div>
+            <SelectionGridView
+              ballots={selectionBallots}
+              options={scenario.options}
+              rounds={runner.result.rounds}
+              roundNumber={roundNumber - 1}
+            />
           </div>
         </div>
       </div>

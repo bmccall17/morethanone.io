@@ -4,8 +4,7 @@ import Button from '@/components/ui/Button'
 import type { RevealViewType } from '@/types/database'
 
 const tabs: { value: RevealViewType; label: string }[] = [
-  { value: 'animation', label: 'Animation' },
-  { value: 'selection', label: 'How They Voted' },
+  { value: 'animation', label: 'Rounds' },
   { value: 'table', label: 'Results Table' },
 ]
 

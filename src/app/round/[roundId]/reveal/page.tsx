@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import WinnerCard from '@/components/WinnerCard'
-import AnimationView from '@/components/reveal/AnimationView'
+import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
+import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
 import { subscribeToRevealView } from '@/lib/realtime'
@@ -112,22 +113,39 @@ export default function PlayerReveal() {
 
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {round && (
           <h1 className="text-xl font-bold text-gray-900 text-center">{round.prompt}</h1>
         )}
 
-        {viewState.view === 'animation' && (
-          <AnimationView
-            result={convergeResult}
-            currentRound={viewState.animationRound}
-            onRoundChange={() => {}} // read-only for participants
-            options={options}
-          />
-        )}
+        <RevealViewSwitcher activeView={viewState.view === 'selection' ? 'animation' : viewState.view} onViewChange={(view) => setViewState(prev => ({ ...prev, view }))} />
 
-        {viewState.view === 'selection' && (
-          <SelectionGridView ballots={ballots} options={options} />
+        {(viewState.view === 'animation' || viewState.view === 'selection') && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Left: Tally bars + round indicator */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card>
+                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} />
+              </Card>
+
+              {/* Round indicator (read-only for participants) */}
+              <div className="flex items-center justify-center">
+                <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
+                  Round {viewState.animationRound} / {convergeResult.rounds.length}
+                </span>
+              </div>
+            </div>
+
+            {/* Right: Selection grid */}
+            <div className="lg:col-span-3">
+              <SelectionGridView
+                ballots={ballots}
+                options={options}
+                rounds={convergeResult.rounds}
+                roundNumber={viewState.animationRound - 1}
+              />
+            </div>
+          </div>
         )}
 
         {viewState.view === 'table' && (

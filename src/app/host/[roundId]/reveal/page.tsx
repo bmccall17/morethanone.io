@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import WinnerCard from '@/components/WinnerCard'
 import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
-import AnimationView from '@/components/reveal/AnimationView'
+import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
 import { RoundData as EliminationRound } from '@/types/database'
@@ -131,24 +131,57 @@ export default function HostReveal() {
 
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {round && (
           <h1 className="text-xl font-bold text-gray-900 text-center">{round.prompt}</h1>
         )}
 
-        <RevealViewSwitcher activeView={viewState.view} onViewChange={handleViewChange} />
+        <RevealViewSwitcher activeView={viewState.view === 'selection' ? 'animation' : viewState.view} onViewChange={handleViewChange} />
 
-        {viewState.view === 'animation' && (
-          <AnimationView
-            result={convergeResult}
-            currentRound={viewState.animationRound}
-            onRoundChange={handleAnimationRoundChange}
-            options={options}
-          />
-        )}
+        {(viewState.view === 'animation' || viewState.view === 'selection') && (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Left: Tally bars + round controls */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card>
+                <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} />
+              </Card>
 
-        {viewState.view === 'selection' && (
-          <SelectionGridView ballots={ballots} options={options} />
+              {/* Step controls */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleAnimationRoundChange(Math.max(1, viewState.animationRound - 1))}
+                  disabled={viewState.animationRound <= 1}
+                  className="flex-1"
+                >
+                  &larr; Previous
+                </Button>
+                <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
+                  {viewState.animationRound} / {convergeResult.rounds.length}
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleAnimationRoundChange(Math.min(convergeResult.rounds.length, viewState.animationRound + 1))}
+                  disabled={viewState.animationRound >= convergeResult.rounds.length}
+                  className="flex-1"
+                >
+                  Next &rarr;
+                </Button>
+              </div>
+            </div>
+
+            {/* Right: Selection grid */}
+            <div className="lg:col-span-3">
+              <SelectionGridView
+                ballots={ballots}
+                options={options}
+                rounds={convergeResult.rounds}
+                roundNumber={viewState.animationRound - 1}
+              />
+            </div>
+          </div>
         )}
 
         {viewState.view === 'table' && (
