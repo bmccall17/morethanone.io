@@ -4,6 +4,35 @@ ideas and features that are interesting but not prioritized. move items to `prdn
 
 ---
 
+## sentiment + commentary during voting
+
+- sentiment flags on each option during ranking — "somebody has a comment about this"
+- click into flag to see what others think about an option
+- rank-weighted visibility: comments from voters who ranked the item highly surface first (like Reddit upvoting, but tied to rank position)
+- gravitational pull visualization — show sentiment pull left/right on items
+
+## post-round
+
+- "felt fair?" quick pulse (1-question emoji scale after reveal)
+- "run it again" flow improvements (carry over participants?)
+
+## analytics
+
+- event instrumentation: round_created, player_joined, ballot_submitted, round_closed, results_revealed
+- quality metrics dashboard: completion rate, time to converge, rounds distribution, tie-break frequency
+
+## pol.is — deeper integrations
+
+- embed Pol.is conversation widget on morethanone pages (post-results, dedicated page)
+- two-way sync: run a morethanone RCV round, push results back to Pol.is conversation
+- auto-generate round options from Pol.is opinion clusters (AI-assisted grouping)
+
+## political use case + curation
+
+- curated political topic library (pre-built prompts + options for common policy debates)
+- collaborator/contributor onboarding — let interested users help curate categories
+- "vote on ideologies not people" mode — issue-based ranking templates
+
 ## accounts + persistence
 
 - accounts, teams, saved libraries of prompts
@@ -29,6 +58,7 @@ ideas and features that are interesting but not prioritized. move items to `prdn
 - zoom app integration
 - miro board embed
 - calendar integration (schedule decisions)
+- pol.is embed (conversation widget on morethanone pages)
 
 ## visual + delight
 

@@ -1,0 +1,77 @@
+[Brett A McCall]
+Right on the coattails of that and share. I mean, I've got too many nuggets really to share one. Um, will you go to more than one i, o? Dot verselle, you know, yeah,
+
+[Speaker 2]
+IO
+
+[Brett A McCall]
+Dot versale.app? So, are you all familiar with ranked Choice voting?
+
+[Speaker 2]
+Yes, okay. So,
+
+[Brett A McCall]
+For a long time, I've been standing for rank Choice, voting, trying to bring it. Unfortunately, it's become politicized, so the parties use it against each other constantly, which drives me insane because it would actually help them. So, what I have been wanting to do is create an app that would help us make smaller decisions as a group that has none of the language of ranked Choice voting in there, but gives people the experience. I'm a game designer, right? So gives people the experience of what it's like to rank choices about a thing so that they can see that when we as a group rank our choices, and then we use this system that we actually come up with the best answer among the group than if we were to just to.
+
+[Brett A McCall]
+And so, by the way, go back one just to show there's a see how it works. You can click on that quick. These are just pre, so you click on next and see how it it moves. Yeah, versus, like saying, here's my Top Choice. Here's my second choice because here's, here's what I think happens in our political climate is. Vote for Trump because they don't think anybody else will win, even though they disagree with him. People will vote for a candidate because they think they will win, not because they agree with them. So, if we had ranked Choice voting, even just in our primaries, we would be able to say, here's my top Joyce, I would vote for Trump fourth on this list, and then the true majority actually emerges instead of this, like people warping their own power.
+
+[Brett A McCall]
+So anyway, that's the demo. So go back one, and you can actually see it going. Just type in, I don't know, like, yeah. Yeah, there you go. And then you do have to fill these in. So just fill them with Schmutz. It doesn't really matter. It's not. There's no sentiment to what they actually are. You want to, at least, like.
+
+[Brett A McCall]
+Yeah, great. You're doing great.
+
+[Speaker 3]
+This
+
+[Brett A McCall]
+Is fantastic. Yes, I'm I'm now very hungry. So, go ahead and create round. Don't do those. Um. On the next screen you want to. So, if we had, you know, we could all dial in if you want to. Um, but just for the demo purposes unless you want. You're welcome to go join! Developers. You can go ahead and say participate this round, so it'll show you the participant and then go ahead and add bot voters. And add all nine of them. Because more results are better than if you wanna yeah. If you want to scan it, go ahead and do it. Yeah, go ahead and do it if I mean, it's right there. Sure, I'll do it too.
+
+[Speaker 3]
+This is awesome, I
+
+[Brett A McCall]
+Didn't. I didn't actually think playtest, but let's play test.
+
+[Brett A McCall]
+So, now you've got a. Did you already start ranking? You did? So you may not have gotten all of us. And oh well, we'll see. I
+
+[Speaker 2]
+Got Brett and Jenny
+
+[Brett A McCall]
+Okay, great. Great. So the rank your votes. Oh no, the mobile isn't working crap. So, yeah, I know. You will move anything. Well, he can drag them. I haven't obviously optimized it for for mobile. Yeah, you can play test it. So, because we've got nine Bots in there, then they will. They will randomly select things so you can see how this will all unfold,
+
+[Speaker 3]
+Um.
+
+[Brett A McCall]
+Let's see! You should be able to click at the bottom lock in my ranking. If you haven't done that, go ahead and do that. Because all the Bots only wait one second. And then they, they submit. There we go everybody's in. I know you can't actually make your choices. So, whatever you had at the top is gonna serve up. Okay. So here, you've got the actual, like how everything unfolds. So, as you step through the animation, you'll see that guac was eliminated. But then, the guac votes move to tacos. Tequila is eliminated. It also moved to tacos. Beans get eliminated. They go to chips now. Chips is winning. Burritos gets eliminated and chips ends up the winner, so this helps because each of those rounds, somebody's Top Choice, was one of those other things. And then they removed that one, and then you get your next book yeah.
+
+[Brett A McCall]
+Right, but notice how there's no language here about voters. There's no, like, I'm just trying to give people the best experience of what it would be like to use these systems. Um, so this is a really great chart that shows how everybody actually voted, then the results table. I really love as well, so it shows round one and who got what got eliminated because it had some a few round two looks like, what round three looks like all the way up so you can see how the whole thing unfolds. If you want to right? Um, did you make this? I did make this, but what I've been wanting to do next is actually go get topics, so I think one of the next things I'm going to do, Frank, is, I'm going to look at polis, and I'm gonna be like, what are the topics that are already out there and see if I can have a button as you're hosting that just says populate populate the popular topics about ice. I populate the popular topics about filling the blank and it like highlights. Everything puts it in there. And then, you got to cast this out for people to vote, but the point would be not just.
+
+[Brett A McCall]
+Say yes, no or whatever, but like? What I want is for during the voting process for there to be a little flag that pops up with with each of the items, and those flags would say. Somebody thinks somebody has a comment to make about this. Somebody has some sentiment to share about this thing, so you could actually click into that and see what Nathan says, and, and by the way, this is Nathan's number one. So his, his opinion is going to be naturally ranked up like a like a Reddit thread would be saying up versus, like, you've got something to say about it, but you've got it at the bottom of your list, or you've got it off your list, so then it would wait the way. So, if you want to see positive sentiment or negative sentiment about this?
+
+[Brett A McCall]
+Them, it actually is showing some of the gravitational pull one to the left or one to the right anyway. So, this is what I've been working on since Friday when I went to a political conversation with two senators talking about ice and they were basically saying, we need to get across the aisle and we need to be working together, and I'm just yelling at the screen like ranked Choice voting would shift all of this. We would need more than two parties, so we wouldn't have this two-party battle. We would have three, four, seven. Parties. It would be a lot different in our world, and a lot would have to change in America, but I think this is a step forward in the direction of, like, just vote more than once.
+
+[Speaker 2]
+I also would prefer to vote on the ideologies instead of people. I think our debates would dramatically
+
+[Brett A McCall]
+Shift it would be less mudslinging and more like actually talking about issues because you'd have seven opinions on this on the stage. And if you're not talking about the issues. You're not going to get the second vote or the third vote. You might not get voted at all. But if you are talking about the issues, then people are more likely to give you that second voter that third vote based on who's up there. Yeah, it's like you can do break choice voting. It's like, do you want a lot of abortion? Do you want a little abortion? Do you want no abortion, like? A lot of abortion gets cut in the first round.
+
+[Brett A McCall]
+Yeah,
+
+[Speaker 3]
+I like that because I don't like the package
+
+[Speaker 2]
+Of all the like. You only have two camps right now. You either have to just sign on to all of these ideologies or all of these. I'm, like, well, I kind of like, dislike a lot of those. Like, I want to mix and match because I think you guys have got it wrong. So, yeah, I would love to vote. And like, I like these ideologies. And these, let's like, smash it together. Yeah. So, if so, I am. Developer
+
+[Brett A McCall]
+Who likes to play with other people I play. Nice. I would love if somebody is excited about, like helping me figure out some of the categories or any of this kind of stuff. I'm I'm at the point now where I do need? People who have more political or more, like, want to make decisions about to plug into it.
