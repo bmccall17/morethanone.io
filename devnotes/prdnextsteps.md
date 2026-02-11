@@ -6,7 +6,7 @@ working list of features and tasks to implement next. move items to `prdparkingl
 
 ## mobile
 
-- [ ] fix drag-and-drop ranking on mobile (broken — confirmed in playtest, host said "the mobile isn't working")
+- [x] fix drag-and-drop ranking on mobile (shipped v0.0.7 — TouchSensor + MouseSensor, touchAction: none, viewport meta)
 - [ ] test touch interactions across iOS Safari and Android Chrome
 
 ## pol.is integration — topic population
@@ -27,7 +27,7 @@ working list of features and tasks to implement next. move items to `prdparkingl
 
 ## ranking UX
 
-- [ ] drag sounds / haptics on mobile (blocked by mobile drag-and-drop fix)
+- [ ] drag sounds / haptics on mobile (unblocked — mobile drag fix shipped in v0.0.7)
 
 ## analytics
 
@@ -41,4 +41,4 @@ working list of features and tasks to implement next. move items to `prdparkingl
 
 ---
 
-*sprint 6 shipped as v0.0.7 on feb 11, 2026: host remove player/option, profanity filter, timer, max ranks, fun name generator, countdown reveal, edge case fixes.*
+*sprint 6 shipped as v0.0.7 on feb 11, 2026: mobile drag-and-drop fix, host remove player/option, profanity filter, timer, max ranks, fun name generator, countdown reveal, edge case fixes.*

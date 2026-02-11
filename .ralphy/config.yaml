@@ -17,19 +17,17 @@ commands:
 # Rules - instructions the AI MUST follow
 # These are injected into every prompt
 rules:
-  # Examples:
-  # - "Always use TypeScript strict mode"
-  # - "Follow the error handling pattern in src/utils/errors.ts"
-  # - "All API endpoints must have input validation with Zod"
-  # - "Use server actions instead of API routes in Next.js"
-  #
-  # Skills/playbooks (optional):
-  # - "Before coding, read and follow any relevant skill/playbook docs under .opencode/skills, .claude/skills, or .github/skills."
+  - "Check supabase/schema.sql before adding columns — if a column is referenced in a SELECT but missing from schema.sql, add it to schema.sql and create a migration file"
+  - "Do NOT modify devnotes/ planning files (prd.md, prdnextsteps.md, prdparkinglot.md, sprint backlogs). Only modify the sprint backlog you were given as --prd to check off completed tasks"
+  - "When creating new database columns or settings fields, always update src/types/database.ts AND supabase/schema.sql"
 
 # Boundaries - files/folders the AI should not modify
 boundaries:
   never_touch:
-    # Examples:
-    # - "src/legacy/**"
-    # - "migrations/**"
-    # - "*.lock"
+    - "devnotes/prd.md"
+    - "devnotes/prdnextsteps.md"
+    - "devnotes/prdparkinglot.md"
+    - "devnotes/releases/**"
+    - "SHIP_LOG.md"
+    - "CLAUDE.md"
+    - "*.lock"
