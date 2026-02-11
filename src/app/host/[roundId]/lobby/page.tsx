@@ -40,6 +40,7 @@ export default function HostLobby() {
   const [actionLoading, setActionLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [hostRankingSubmitted, setHostRankingSubmitted] = useState(false)
+  const [removingOption, setRemovingOption] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const hostToken = typeof window !== 'undefined' ? getHostToken(roundId) : null
@@ -257,6 +258,28 @@ export default function HostLobby() {
     }
   }
 
+  async function handleRemoveOption(option: string) {
+    setRemovingOption(option)
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/options/remove`, {
+        method: 'POST',
+        headers: { ...getHostHeaders(roundId), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ option }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to remove option')
+        return
+      }
+      const data = await res.json()
+      setRound((prev) => prev ? { ...prev, options: data.options } : prev)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove option')
+    } finally {
+      setRemovingOption(null)
+    }
+  }
+
   async function handleReveal() {
     setActionLoading(true)
     setError('')
@@ -343,6 +366,38 @@ export default function HostLobby() {
             />
           )}
         </Card>
+
+        {round.status === 'setup' && round.options.length > 0 && (
+          <Card>
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700">Options</h3>
+              <ul className="space-y-1">
+                {round.options.map((option) => (
+                  <li
+                    key={option}
+                    className="flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-gray-100"
+                  >
+                    <span className="text-sm text-gray-900">{option}</span>
+                    <button
+                      onClick={() => handleRemoveOption(option)}
+                      disabled={removingOption === option}
+                      className="ml-2 w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      aria-label={`Remove ${option}`}
+                    >
+                      {removingOption === option ? (
+                        <span className="text-xs">...</span>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Card>
+        )}
 
         {round.status === 'ranking' && round.settings?.host_as_participant && getParticipantId(roundId) && (
           <Card>
