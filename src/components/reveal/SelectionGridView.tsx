@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { getOptionColor } from '@/lib/colors'
+import { getOptionStyle, getPatternStyle, getTierBorderStyle } from '@/lib/colors'
+import type { OptionStyle } from '@/lib/colors'
 import type { ConvergeRound } from '@/lib/engine/types'
 
 interface SelectionGridViewProps {
@@ -23,11 +24,11 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
     return `${n}th`
   })
 
-  // Map each option to a stable color from shared palette
-  const optionColorMap = useMemo(() => {
-    const map: Record<string, { hex: string; text: string }> = {}
+  // Map each option to a stable style from shared palette
+  const optionStyleMap = useMemo(() => {
+    const map: Record<string, OptionStyle> = {}
     options.forEach((opt, i) => {
-      map[opt] = getOptionColor(i)
+      map[opt] = getOptionStyle(i)
     })
     return map
   }, [options])
@@ -49,15 +50,15 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
       {/* Legend */}
       <div className="flex flex-wrap gap-2 mb-4">
         {options.map(opt => {
-          const color = optionColorMap[opt]
+          const style = optionStyleMap[opt]
           const isEliminated = isAnimating && eliminatedSet.has(opt)
           return (
             <span
               key={opt}
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-opacity duration-500 ${color.text} ${
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-opacity duration-500 ${style.text} ${
                 isEliminated ? 'opacity-30 line-through' : ''
               }`}
-              style={{ backgroundColor: color.hex }}
+              style={isEliminated ? { backgroundColor: style.hex } : getPatternStyle(style.modifier, style.hex)}
             >
               {opt}
             </span>
@@ -90,23 +91,27 @@ export default function SelectionGridView({ ballots, options, rounds, roundNumbe
                 </td>
                 {rankLabels.map((_, colIndex) => {
                   const rankedOption = ballot.ranking[colIndex]
-                  const color = rankedOption ? optionColorMap[rankedOption] : null
+                  const style = rankedOption ? optionStyleMap[rankedOption] : null
                   const isEliminated = isAnimating && rankedOption ? eliminatedSet.has(rankedOption) : false
                   const isActive = isAnimating && rankedOption === activePreference
 
                   return (
                     <td key={colIndex} className="text-center py-2 px-1">
                       <div className="flex items-center justify-center">
-                        {rankedOption && color ? (
+                        {rankedOption && style ? (
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold leading-none transition-all duration-500 ${
                               isEliminated
                                 ? 'text-gray-500 opacity-40'
                                 : isActive
-                                  ? `${color.text} ring-2 ring-white scale-110`
-                                  : color.text
+                                  ? `${style.text} outline outline-2 outline-white scale-110`
+                                  : style.text
                             }`}
-                            style={{ backgroundColor: isEliminated ? '#374151' : color.hex }}
+                            style={{
+                              ...(isEliminated
+                                ? { backgroundColor: '#374151' }
+                                : { ...getPatternStyle(style.modifier, style.hex), ...getTierBorderStyle(style.tier) }),
+                            }}
                             title={rankedOption}
                           >
                             {rankedOption.length <= 3 ? rankedOption : rankedOption.slice(0, 2)}

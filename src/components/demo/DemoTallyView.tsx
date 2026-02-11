@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { getOptionColor } from '@/lib/colors'
+import { getOptionStyle, getPatternStyle, getShapeClass } from '@/lib/colors'
 import type { ConvergeResult, ConvergeRound } from '@/lib/engine/types'
 
 interface DemoTallyViewProps {
@@ -10,10 +10,6 @@ interface DemoTallyViewProps {
   roundNumber: number
   /** Canonical option list for stable color mapping (shared with SelectionGridView) */
   options?: string[]
-}
-
-function getColor(index: number): string {
-  return getOptionColor(index).hex
 }
 
 /**
@@ -68,11 +64,11 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
     return [...opts]
   }, [rounds])
 
-  // Color index lookup — use canonical options prop when available for consistency with SelectionGridView
-  const colorIndex = useMemo(() => {
+  // Style index lookup — use canonical options prop when available for consistency with SelectionGridView
+  const styleIndex = useMemo(() => {
     const map: Record<string, number> = {}
-    const colorSource = options || allOptions
-    colorSource.forEach((opt, i) => { map[opt] = i })
+    const styleSource = options || allOptions
+    styleSource.forEach((opt, i) => { map[opt] = i })
     return map
   }, [options, allOptions])
 
@@ -128,15 +124,16 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
           const isElimNow = eliminatedThisRound === option
           const isTheWinner = isLastRound && option === winner
           const barPct = (total / maxTally) * 100
+          const optStyle = getOptionStyle(styleIndex[option])
 
           // Build ordered segments: self first, then transferred sources
-          const segments: { source: string; count: number; hex: string }[] = []
+          const segments: { source: string; count: number; idx: number }[] = []
           if (optProv[option] > 0) {
-            segments.push({ source: option, count: optProv[option], hex: getColor(colorIndex[option]) })
+            segments.push({ source: option, count: optProv[option], idx: styleIndex[option] })
           }
           for (const [src, cnt] of Object.entries(optProv)) {
             if (src !== option && cnt > 0) {
-              segments.push({ source: src, count: cnt, hex: getColor(colorIndex[src]) })
+              segments.push({ source: src, count: cnt, idx: styleIndex[src] })
             }
           }
 
@@ -151,8 +148,8 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
               <div className="flex items-center justify-between mb-0.5">
                 <div className="flex items-center gap-1.5">
                   <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: getColor(colorIndex[option]) }}
+                    className={`w-2.5 h-2.5 shrink-0 ${getShapeClass(optStyle.shape)}`}
+                    style={{ backgroundColor: optStyle.hex }}
                   />
                   <span className={`text-sm font-medium ${
                     isTheWinner
@@ -189,13 +186,14 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
                   {segments.map(seg => {
                     const segPct = total > 0 ? (seg.count / total) * 100 : 0
                     const isSelf = seg.source === option
+                    const segStyle = getOptionStyle(seg.idx)
                     return (
                       <div
                         key={seg.source}
                         className="h-full transition-all duration-700 ease-out first:rounded-l-full last:rounded-r-full"
                         style={{
                           width: `${segPct}%`,
-                          backgroundColor: seg.hex,
+                          ...getPatternStyle(segStyle.modifier, segStyle.hex),
                           opacity: isSelf ? 1 : 0.75,
                         }}
                         title={isSelf ? `${seg.count} original` : `${seg.count} from ${seg.source}`}
@@ -208,15 +206,18 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
               {/* Segment legend (only if bar has multiple sources) */}
               {segments.length > 1 && (
                 <div className="flex flex-wrap gap-x-3 mt-0.5">
-                  {segments.map(seg => (
-                    <span key={seg.source} className="text-[10px] text-gray-400 flex items-center gap-1">
-                      <span
-                        className="w-1.5 h-1.5 rounded-full inline-block"
-                        style={{ backgroundColor: seg.hex }}
-                      />
-                      {seg.count} from {seg.source}
-                    </span>
-                  ))}
+                  {segments.map(seg => {
+                    const segStyle = getOptionStyle(seg.idx)
+                    return (
+                      <span key={seg.source} className="text-[10px] text-gray-400 flex items-center gap-1">
+                        <span
+                          className={`w-1.5 h-1.5 inline-block ${getShapeClass(segStyle.shape)}`}
+                          style={{ backgroundColor: segStyle.hex }}
+                        />
+                        {seg.count} from {seg.source}
+                      </span>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -227,22 +228,25 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
       {/* Transfer indicators for current round's elimination */}
       {currentRound.transfers.length > 0 && (
         <div className="space-y-0.5 text-xs text-gray-500">
-          {currentRound.transfers.map((t, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: getColor(colorIndex[t.from]) }}
-              />
-              <span className="text-gray-400">{t.from}</span>
-              <span>&rarr;</span>
-              {t.to ? (
-                <span style={{ color: getColor(colorIndex[t.to]) }}>{t.to}</span>
-              ) : (
-                <span className="text-gray-400">exhausted</span>
-              )}
-              <span className="text-gray-400">({t.count})</span>
-            </div>
-          ))}
+          {currentRound.transfers.map((t, i) => {
+            const fromStyle = getOptionStyle(styleIndex[t.from])
+            return (
+              <div key={i} className="flex items-center gap-1">
+                <span
+                  className={`w-2 h-2 shrink-0 ${getShapeClass(fromStyle.shape)}`}
+                  style={{ backgroundColor: fromStyle.hex }}
+                />
+                <span className="text-gray-400">{t.from}</span>
+                <span>&rarr;</span>
+                {t.to ? (
+                  <span style={{ color: getOptionStyle(styleIndex[t.to]).hex }}>{t.to}</span>
+                ) : (
+                  <span className="text-gray-400">exhausted</span>
+                )}
+                <span className="text-gray-400">({t.count})</span>
+              </div>
+            )
+          })}
         </div>
       )}
 
