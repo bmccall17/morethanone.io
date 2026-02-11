@@ -46,11 +46,12 @@ export async function POST(
     )
   }
 
-  // Get all rankings
+  // Get rankings from non-removed participants only
   const { data: rankings, error: rankingsError } = await supabase
     .from('rankings')
-    .select('ranking')
+    .select('ranking, participants!inner(removed)')
     .eq('round_id', roundId)
+    .eq('participants.removed', false)
 
   if (rankingsError) {
     return NextResponse.json({ error: rankingsError.message }, { status: 500 })

@@ -23,11 +23,12 @@ export async function GET(
     return NextResponse.json({ error: 'Results not yet available' }, { status: 400 })
   }
 
-  // Get rankings joined with participants
+  // Get rankings joined with non-removed participants
   const { data: rankings, error: rankingsError } = await supabase
     .from('rankings')
-    .select('ranking, participant_id, participants!inner(display_name)')
+    .select('ranking, participant_id, participants!inner(display_name, removed)')
     .eq('round_id', roundId)
+    .eq('participants.removed', false)
 
   if (rankingsError) {
     return NextResponse.json({ error: rankingsError.message }, { status: 500 })
