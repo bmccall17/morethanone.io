@@ -64,6 +64,14 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
     return [...opts]
   }, [rounds])
 
+  // Canonical display order: options prop first, then any extras from tallies
+  const displayOptions = useMemo(() => {
+    if (!options || options.length === 0) return allOptions
+    const set = new Set(options)
+    const extras = allOptions.filter(opt => !set.has(opt))
+    return [...options, ...extras]
+  }, [options, allOptions])
+
   // Style index lookup — use canonical options prop when available for consistency with SelectionGridView
   const styleIndex = useMemo(() => {
     const map: Record<string, number> = {}
@@ -117,7 +125,7 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
 
       {/* Stacked bar chart */}
       <div className="space-y-2.5">
-        {allOptions.map(option => {
+        {displayOptions.map(option => {
           const optProv = provenance[option] || {}
           const total = Object.values(optProv).reduce((s, v) => s + v, 0)
           const isGone = eliminatedBefore.has(option)

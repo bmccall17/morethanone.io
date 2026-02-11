@@ -35,6 +35,14 @@ export default function AnimationView({ result, currentRound, onRoundChange, opt
     return [...opts]
   }, [rounds, options])
 
+  // Canonical display order: options prop first, then any extras from tallies
+  const displayOptions = useMemo(() => {
+    if (!options || options.length === 0) return allOptions
+    const set = new Set(options)
+    const extras = allOptions.filter(opt => !set.has(opt))
+    return [...options, ...extras]
+  }, [options, allOptions])
+
   const maxTally = useMemo(() => {
     let max = 0
     for (const round of rounds) {
@@ -165,7 +173,7 @@ export default function AnimationView({ result, currentRound, onRoundChange, opt
 
       {/* Bar chart */}
       <div className="space-y-3 bg-gray-900 rounded-xl p-4">
-        {allOptions.map(option => {
+        {displayOptions.map(option => {
           const count = currentRoundData.tallies[option]
           const isGoneAlready = previouslyEliminated.has(option)
           const isEliminatedNow = currentRoundData.eliminated === option

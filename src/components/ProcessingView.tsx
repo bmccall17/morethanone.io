@@ -176,6 +176,7 @@ export default function ProcessingView({ roundId, redirectOnReveal, triggerProce
             <Card>
               <RevealAnimation
                 result={convergeResult}
+                options={options}
                 showStepButton={showStepButton}
                 onComplete={() => setAnimationComplete(true)}
                 onRoundChange={setAnimationRound}

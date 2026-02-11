@@ -60,9 +60,11 @@ interface RevealAnimationProps {
   onComplete?: () => void
   showStepButton?: boolean
   onRoundChange?: (roundNumber: number) => void
+  /** Canonical option list for stable color/order mapping (shared with SelectionGridView) */
+  options?: string[]
 }
 
-export default function RevealAnimation({ result, onComplete, showStepButton, onRoundChange }: RevealAnimationProps) {
+export default function RevealAnimation({ result, onComplete, showStepButton, onRoundChange, options }: RevealAnimationProps) {
   const [phase, setPhase] = useState<Phase>({ type: 'tallies', roundIndex: 0 })
   const [skipped, setSkipped] = useState(false)
   const [manualMode, setManualMode] = useState(false)
@@ -80,12 +82,21 @@ export default function RevealAnimation({ result, onComplete, showStepButton, on
     return [...opts]
   }, [rounds])
 
-  // Style index lookup
+  // Canonical display order: options prop first, then any extras from tallies
+  const displayOptions = useMemo(() => {
+    if (!options || options.length === 0) return allOptions
+    const set = new Set(options)
+    const extras = allOptions.filter(opt => !set.has(opt))
+    return [...options, ...extras]
+  }, [options, allOptions])
+
+  // Style index lookup — use canonical options prop when available for consistency with SelectionGridView
   const styleIndex = useMemo(() => {
     const map: Record<string, number> = {}
-    allOptions.forEach((opt, i) => { map[opt] = i })
+    const styleSource = options && options.length > 0 ? options : allOptions
+    styleSource.forEach((opt, i) => { map[opt] = i })
     return map
-  }, [allOptions])
+  }, [options, allOptions])
 
   const maxTally = useMemo(() => {
     let max = 0
@@ -269,7 +280,7 @@ export default function RevealAnimation({ result, onComplete, showStepButton, on
 
       {/* Stacked bar chart */}
       <div className="space-y-2.5" data-testid="bar-chart">
-        {allOptions.map(option => {
+        {displayOptions.map(option => {
           const optProv = provenance[option] || {}
           const total = Object.values(optProv).reduce((s, v) => s + v, 0)
           const isGone = eliminatedBefore.has(option)
