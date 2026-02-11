@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { containsProfanity } from '@/lib/profanity'
 
 function generateJoinCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -20,6 +21,10 @@ export async function POST(request: Request) {
     }
     if (!options || !Array.isArray(options) || options.length < 2) {
       return NextResponse.json({ error: 'At least 2 options required' }, { status: 400 })
+    }
+    const profaneOption = options.find((opt: string) => containsProfanity(opt))
+    if (profaneOption) {
+      return NextResponse.json({ error: 'One of your options contains inappropriate language. Please revise it.' }, { status: 400 })
     }
 
     const supabase = await createClient()

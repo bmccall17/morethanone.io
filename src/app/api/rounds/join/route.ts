@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { containsProfanity } from '@/lib/profanity'
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +12,9 @@ export async function POST(request: Request) {
     }
     if (!displayName || typeof displayName !== 'string' || displayName.trim().length === 0) {
       return NextResponse.json({ error: 'Display name is required' }, { status: 400 })
+    }
+    if (containsProfanity(displayName)) {
+      return NextResponse.json({ error: 'Display name contains inappropriate language. Please choose a different name.' }, { status: 400 })
     }
 
     const supabase = await createClient()
