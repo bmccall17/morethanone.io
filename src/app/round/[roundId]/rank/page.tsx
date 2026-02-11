@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import DraggableRankList from '@/components/DraggableRankList'
+import CountdownTimer, { computeDeadline } from '@/components/CountdownTimer'
 import { getParticipantId } from '@/lib/host-token'
 import { subscribeToRound } from '@/lib/realtime'
 
@@ -12,7 +13,14 @@ export default function RankPage() {
   const router = useRouter()
   const roundId = params.roundId as string
 
-  const [round, setRound] = useState<{ prompt: string; options: string[]; status: string } | null>(null)
+  const [round, setRound] = useState<{
+    prompt: string
+    options: string[]
+    status: string
+    settings?: { timer_minutes?: number }
+    ranking_started_at?: string | null
+  } | null>(null)
+  const [timerExpired, setTimerExpired] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [error, setError] = useState('')
@@ -123,6 +131,10 @@ export default function RankPage() {
     )
   }
 
+  const timerDeadline = round.settings?.timer_minutes && round.ranking_started_at
+    ? computeDeadline(round.ranking_started_at, round.settings.timer_minutes)
+    : null
+
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
       <div className="max-w-md mx-auto space-y-6">
@@ -131,13 +143,27 @@ export default function RankPage() {
           <p className="text-sm text-gray-500 mt-1">Your next choices matter. Rank sincerely.</p>
         </div>
 
+        {timerDeadline && (
+          <CountdownTimer
+            deadlineIso={timerDeadline}
+            onExpired={() => setTimerExpired(true)}
+          />
+        )}
+
         {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
-        <DraggableRankList
-          options={shuffledOptions}
-          onSubmit={handleSubmit}
-          loading={submitLoading}
-        />
+        {timerExpired ? (
+          <Card className="text-center">
+            <p className="text-lg font-bold text-red-600 py-4">Time&apos;s up!</p>
+            <p className="text-sm text-gray-500">Waiting for the host to reveal results...</p>
+          </Card>
+        ) : (
+          <DraggableRankList
+            options={shuffledOptions}
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
+        )}
       </div>
     </main>
   )

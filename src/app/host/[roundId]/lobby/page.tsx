@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -10,6 +10,7 @@ import JoinCodeDisplay from '@/components/JoinCodeDisplay'
 import PlayerList from '@/components/PlayerList'
 import DraggableRankList from '@/components/DraggableRankList'
 import SubmissionCounter from '@/components/SubmissionCounter'
+import CountdownTimer, { computeDeadline } from '@/components/CountdownTimer'
 import { getHostToken, getHostHeaders, saveParticipantId, getParticipantId } from '@/lib/host-token'
 import { subscribeToRound, subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
 
@@ -19,8 +20,9 @@ interface RoundData {
   prompt: string
   description: string | null
   options: string[]
-  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean; bot_count: number }
+  settings: { allowTies: boolean; anonymousResults: boolean; host_as_participant: boolean; show_processing: boolean; bot_count: number; timer_minutes?: number }
   status: string
+  ranking_started_at: string | null
 }
 
 interface Player {
@@ -160,6 +162,22 @@ export default function HostLobby() {
       setActionLoading(false)
     }
   }
+
+  const handleTimerExpired = useCallback(async () => {
+    if (round?.status !== 'ranking') return
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/close`, {
+        method: 'POST',
+        headers: getHostHeaders(roundId),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to auto-close')
+      }
+    } catch {
+      setError('Failed to auto-close ranking')
+    }
+  }, [round?.status, roundId])
 
   async function handleStartProcessing() {
     setActionLoading(true)
@@ -410,6 +428,15 @@ export default function HostLobby() {
                 loading={submitLoading}
               />
             )}
+          </Card>
+        )}
+
+        {round.status === 'ranking' && round.settings?.timer_minutes && round.ranking_started_at && (
+          <Card>
+            <CountdownTimer
+              deadlineIso={computeDeadline(round.ranking_started_at, round.settings.timer_minutes)}
+              onExpired={handleTimerExpired}
+            />
           </Card>
         )}
 

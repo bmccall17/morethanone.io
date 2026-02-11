@@ -69,6 +69,25 @@ describe('settings API merge logic', () => {
     expect(result.bot_count).toBe(5)
     expect(result.allowTies).toBe(false)
   })
+
+  test('merges timer_minutes into settings', () => {
+    const result = mergeSettings(defaultSettings, { timer_minutes: 5 })
+    expect(result.timer_minutes).toBe(5)
+    expect(result.allowTies).toBe(false)
+    expect(result.bot_count).toBe(0)
+  })
+
+  test('preserves timer_minutes when patching other fields', () => {
+    const existing: RoundSettings = { ...defaultSettings, timer_minutes: 10 }
+    const result = mergeSettings(existing, { allowTies: true })
+    expect(result.timer_minutes).toBe(10)
+    expect(result.allowTies).toBe(true)
+  })
+
+  test('timer_minutes remains undefined when not set', () => {
+    const result = mergeSettings(defaultSettings, { allowTies: true })
+    expect(result.timer_minutes).toBeUndefined()
+  })
 })
 
 describe('settings API authorization checks', () => {

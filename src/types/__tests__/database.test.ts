@@ -21,10 +21,20 @@ describe('RoundSettings', () => {
     expect(defaultSettings.bot_count).toBe(0)
   })
 
+  test('timer_minutes is optional and defaults to undefined', () => {
+    expect(defaultSettings.timer_minutes).toBeUndefined()
+  })
+
+  test('timer_minutes can be set to a number', () => {
+    const withTimer: RoundSettings = { ...defaultSettings, timer_minutes: 5 }
+    expect(withTimer.timer_minutes).toBe(5)
+  })
+
   test('all boolean settings default to false', () => {
-    const { bot_count, ...booleanSettings } = defaultSettings
+    const { bot_count, timer_minutes, ...booleanSettings } = defaultSettings
     expect(Object.values(booleanSettings).every(v => v === false)).toBe(true)
     expect(bot_count).toBe(0)
+    expect(timer_minutes).toBeUndefined()
   })
 
   test('settings object is assignable to Round.settings', () => {
@@ -39,11 +49,13 @@ describe('RoundSettings', () => {
       host_token: 'token',
       current_processing_round: 0,
       reveal_view_state: { view: 'animation' as const, animationRound: 0 },
+      ranking_started_at: null,
       created_at: new Date().toISOString(),
     } satisfies Round
 
     expect(round.settings.host_as_participant).toBe(false)
     expect(round.settings.show_processing).toBe(false)
     expect(round.settings.bot_count).toBe(0)
+    expect(round.ranking_started_at).toBeNull()
   })
 })

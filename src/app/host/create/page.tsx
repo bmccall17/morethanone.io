@@ -25,6 +25,7 @@ function CreateRoundForm() {
   const [options, setOptions] = useState<string[]>(prefillOptions)
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
+  const [timerMinutes, setTimerMinutes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -49,7 +50,11 @@ function CreateRoundForm() {
           prompt: prompt.trim(),
           description: description.trim() || null,
           options,
-          settings: { allowTies, anonymousResults },
+          settings: {
+            allowTies,
+            anonymousResults,
+            ...(timerMinutes ? { timer_minutes: Number(timerMinutes) } : {}),
+          },
         }),
       })
 
@@ -114,6 +119,22 @@ function CreateRoundForm() {
               checked={anonymousResults}
               onChange={setAnonymousResults}
             />
+            <div>
+              <label htmlFor="timer-minutes" className="block text-sm font-medium text-gray-700">
+                Ranking timer (optional)
+              </label>
+              <p className="text-xs text-gray-500 mb-1">Set a time limit for ranking in minutes</p>
+              <input
+                id="timer-minutes"
+                type="number"
+                min={1}
+                max={60}
+                placeholder="No timer"
+                value={timerMinutes}
+                onChange={e => setTimerMinutes(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+            </div>
           </div>
         </Card>
 

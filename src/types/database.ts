@@ -9,6 +9,7 @@ export interface RoundSettings {
   host_as_participant: boolean
   show_processing: boolean
   bot_count: number
+  timer_minutes?: number
 }
 
 export interface Round {
@@ -22,6 +23,7 @@ export interface Round {
   host_token: string
   current_processing_round: number
   reveal_view_state: RevealViewState
+  ranking_started_at: string | null
   created_at: string
 }
 

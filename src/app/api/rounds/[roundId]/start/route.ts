@@ -55,7 +55,7 @@ export async function POST(
 
   const { error: updateError } = await supabase
     .from('rounds')
-    .update({ status: 'ranking' })
+    .update({ status: 'ranking', ranking_started_at: new Date().toISOString() })
     .eq('id', roundId)
 
   if (updateError) {
