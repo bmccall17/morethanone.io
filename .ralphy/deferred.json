@@ -9,11 +9,6 @@
       "count": 1,
       "last": "2026-02-09T17:46:02.800Z",
       "title": "Create a participant processing view at `src/app/round/[roundId]/processing/page.tsx`. When `show_processing` is enabled and round status is `processing`, redirect participants here from the waiting page. This page subscribes to processing updates via `subscribeToProcessing()` and fetches each round's data as it becomes available. Display the round-by-round results using the existing `RevealAnimation` component from `src/components/RevealAnimation.tsx`, advancing one round at a time as data arrives. When processing completes (status changes to `revealed`), show the full results."
-    },
-    "markdown:devnotes/sprint-6-backlog.md:19": {
-      "count": 1,
-      "last": "2026-02-11T04:26:20.066Z",
-      "title": "Add a `max_ranks` field to the round settings object in `src/types/database.ts`. Add a \"Max ranks\" numeric input to the host create page at `src/app/host/create/page.tsx` (default: rank all). Store it in settings jsonb. Enforce it in the `DraggableRankList` component at `src/components/DraggableRankList.tsx` — when the player has ranked `max_ranks` items, disable dragging additional items into the ranked zone and show a message like \"You can rank up to N options.\" Also enforce server-side in `src/app/api/rounds/[roundId]/rankings/route.ts` — reject rankings that exceed `max_ranks`."
     }
   }
 }

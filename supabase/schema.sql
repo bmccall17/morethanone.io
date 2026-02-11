@@ -12,6 +12,8 @@ create table if not exists rounds (
   status text not null default 'setup' check (status in ('setup', 'ranking', 'processing', 'closed', 'revealed')),
   host_token uuid not null,
   current_processing_round integer not null default 0,
+  reveal_view_state jsonb,
+  ranking_started_at timestamptz,
   created_at timestamptz not null default now()
 );
 

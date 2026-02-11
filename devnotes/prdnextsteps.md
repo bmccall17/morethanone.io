@@ -41,4 +41,4 @@ working list of features and tasks to implement next. move items to `prdparkingl
 
 ---
 
-*items moved to `sprint-6-backlog.md` on feb 10, 2026: countdown to reveal, host remove player, host remove option, profanity filter, timer, max ranks, fun name generator, sprint 5 edge case testing.*
+*sprint 6 shipped as v0.0.7 on feb 11, 2026: host remove player/option, profanity filter, timer, max ranks, fun name generator, countdown reveal, edge case fixes.*

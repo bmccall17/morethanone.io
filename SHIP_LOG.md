@@ -2,6 +2,7 @@
 
 | version | title | date | summary |
 |---------|-------|------|---------|
+| [v0.0.7](devnotes/releases/v0.0.7.md) | polish + safety | feb 11, 2026 | sprint 6: host moderation (remove players/options), profanity filter, ranking timer, max ranks, fun name generator, 3-2-1 countdown reveal, reveal edge case fixes |
 | [v0.0.6](devnotes/releases/v0.0.6.md) | tiered option distinguishability + processing polish | feb 10, 2026 | 8-color palette with 3-tier pattern/shape system (24 unique combos), shared processing view, bot voters, polling fallback, step button, cross-panel color consistency |
 | [v0.0.5](devnotes/releases/v0.0.5.md) | host-controlled reveal views + demo upgrades | feb 10, 2026 | 3-tab reveal layout switcher broadcast to participants, stacked provenance bars with transfer animation in demo, 16-voter 4x4 grid, processing redirect fix |
 | [v0.0.4](devnotes/releases/v0.0.4.md) | demo mode | feb 9, 2026 | standalone demo with 3 scenarios, step-by-step playback, plain-language explanations, composite host + participant view |
