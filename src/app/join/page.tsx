@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
 import { saveParticipantId } from '@/lib/host-token'
+import { generateFunName } from '@/lib/fun-names'
 
 function JoinForm() {
   const router = useRouter()
@@ -75,13 +76,22 @@ function JoinForm() {
               maxLength={6}
               className="text-center text-2xl font-mono tracking-widest uppercase"
             />
-            <Input
-              label="Your name"
-              placeholder="Enter your display name"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
-              maxLength={30}
-            />
+            <div>
+              <Input
+                label="Your name"
+                placeholder="Enter your display name"
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                maxLength={30}
+              />
+              <button
+                type="button"
+                onClick={() => setDisplayName(generateFunName())}
+                className="mt-1 text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                Random name
+              </button>
+            </div>
           </div>
         </Card>
 
