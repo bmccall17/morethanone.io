@@ -91,8 +91,7 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
   }, [rounds])
 
   const clampedIndex = Math.min(roundNumber, rounds.length) - 1
-  const currentRound = rounds[clampedIndex]
-  const isLastRound = clampedIndex === rounds.length - 1 && !currentRound.eliminated
+  const safeIndex = Math.max(0, clampedIndex)
 
   // Provenance for stacked bars at current display round
   const provenance = useMemo(
@@ -109,6 +108,9 @@ export default function DemoTallyView({ result, roundNumber, options }: DemoTall
     return set
   }, [rounds, clampedIndex])
 
+  const currentRound = rounds[safeIndex]
+  if (!currentRound) return null
+  const isLastRound = clampedIndex === rounds.length - 1 && !currentRound.eliminated
   const eliminatedThisRound = currentRound.eliminated
 
   return (

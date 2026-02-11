@@ -134,12 +134,14 @@ export default function PlayerReveal() {
                 <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} options={options} />
               </Card>
 
-              {/* Round indicator (read-only for participants) */}
-              <div className="flex items-center justify-center">
-                <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
-                  Round {viewState.animationRound} / {convergeResult.rounds.length}
-                </span>
-              </div>
+              {/* Round indicator (read-only for participants, hidden for single-round) */}
+              {convergeResult.rounds.length > 1 && (
+                <div className="flex items-center justify-center">
+                  <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
+                    Round {viewState.animationRound} / {convergeResult.rounds.length}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Right: Selection grid */}

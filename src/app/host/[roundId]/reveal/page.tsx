@@ -152,30 +152,32 @@ export default function HostReveal() {
                 <DemoTallyView result={convergeResult} roundNumber={viewState.animationRound} options={options} />
               </Card>
 
-              {/* Step controls */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleAnimationRoundChange(Math.max(1, viewState.animationRound - 1))}
-                  disabled={viewState.animationRound <= 1}
-                  className="flex-1"
-                >
-                  &larr; Previous
-                </Button>
-                <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
-                  {viewState.animationRound} / {convergeResult.rounds.length}
-                </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleAnimationRoundChange(Math.min(convergeResult.rounds.length, viewState.animationRound + 1))}
-                  disabled={viewState.animationRound >= convergeResult.rounds.length}
-                  className="flex-1"
-                >
-                  Next &rarr;
-                </Button>
-              </div>
+              {/* Step controls (hidden for single-round results) */}
+              {convergeResult.rounds.length > 1 && (
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAnimationRoundChange(Math.max(1, viewState.animationRound - 1))}
+                    disabled={viewState.animationRound <= 1}
+                    className="flex-1"
+                  >
+                    &larr; Previous
+                  </Button>
+                  <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
+                    {viewState.animationRound} / {convergeResult.rounds.length}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleAnimationRoundChange(Math.min(convergeResult.rounds.length, viewState.animationRound + 1))}
+                    disabled={viewState.animationRound >= convergeResult.rounds.length}
+                    className="flex-1"
+                  >
+                    Next &rarr;
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Right: Selection grid */}
