@@ -66,16 +66,23 @@ export async function POST(
   const botCount = round.settings?.bot_count ?? 0
   if (botCount > 0 && round.options?.length >= 2) {
     const botNames = pickBotNames(botCount)
-    for (const name of botNames) {
+    for (let i = 0; i < botNames.length; i++) {
       try {
         const { data: botParticipant } = await supabase
           .from('participants')
-          .insert({ round_id: roundId, display_name: name })
+          .insert({ round_id: roundId, display_name: botNames[i] })
           .select('id')
           .single()
 
         if (botParticipant) {
-          const shuffled = [...round.options].sort(() => Math.random() - 0.5)
+          // Seed each bot differently using clock + bot index
+          let seed = (Date.now() ^ (i * 2654435761)) >>> 0
+          const shuffled = [...round.options]
+          for (let j = shuffled.length - 1; j > 0; j--) {
+            seed = (seed * 1664525 + 1013904223) >>> 0
+            const k = seed % (j + 1)
+            ;[shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]]
+          }
           await supabase
             .from('rankings')
             .insert({ round_id: roundId, participant_id: botParticipant.id, ranking: shuffled })

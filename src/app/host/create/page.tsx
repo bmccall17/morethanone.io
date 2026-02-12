@@ -9,6 +9,24 @@ import Toggle from '@/components/ui/Toggle'
 import OptionEditor from '@/components/OptionEditor'
 import { saveHostToken } from '@/lib/host-token'
 
+const POLL_TEMPLATES = [
+  {
+    label: 'Games You Love',
+    prompt: 'Games you love to play',
+    options: ['Settlers of Catan', 'Wingspan', 'The Legend of Zelda: Tears of the Kingdom', 'Baldur\'s Gate 3', 'Minecraft', 'Ticket to Ride', 'Elden Ring'],
+  },
+  {
+    label: 'Best Movie of All Time',
+    prompt: 'What is the greatest movie ever made?',
+    options: ['The Shawshank Redemption', 'The Godfather', 'Spirited Away', 'The Dark Knight', 'Parasite', 'Pulp Fiction', 'The Lord of the Rings: Return of the King'],
+  },
+  {
+    label: 'Team Lunch',
+    prompt: 'Where should we go for team lunch?',
+    options: ['Thai', 'Pizza', 'Sushi', 'Tacos', 'Indian', 'Burgers', 'Mediterranean'],
+  },
+]
+
 function CreateRoundForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -82,6 +100,27 @@ function CreateRoundForm() {
           <h1 className="text-2xl font-bold text-gray-900">Create a round</h1>
           <p className="text-gray-500 mt-1">Set up a question and options for your group.</p>
         </div>
+
+        {!prompt && options.length === 0 && (
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-2">Start from a template</p>
+            <div className="flex flex-wrap gap-2">
+              {POLL_TEMPLATES.map((t) => (
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => {
+                    setPrompt(t.prompt)
+                    setOptions(t.options)
+                  }}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-200"
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Card>
           <div className="space-y-4">
