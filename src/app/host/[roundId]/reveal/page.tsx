@@ -10,7 +10,7 @@ import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
 import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
-import { saveHostToken } from '@/lib/host-token'
+import { saveHostToken, getHostToken } from '@/lib/host-token'
 import { RoundData as EliminationRound } from '@/types/database'
 import type { RevealViewType, RevealViewState } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
@@ -59,7 +59,7 @@ export default function HostReveal() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const hostToken = typeof window !== 'undefined' ? localStorage.getItem(`host_token_${roundId}`) : null
+  const hostToken = typeof window !== 'undefined' ? (getHostToken(roundId) || localStorage.getItem(`host_token_${roundId}`)) : null
 
   const broadcastViewState = useCallback(async (newState: RevealViewState) => {
     if (!hostToken) return
