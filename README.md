@@ -2,7 +2,7 @@
 
 morethanone is a social decision tool for groups. A host creates a round, players rank the options in order of preference, and the system processes those rankings down to a single group choice. The result tends to reflect the broadest overlap in the room, the option that the most people can genuinely get behind.
 
-It lives at [morethanone.io](https://morethanone.io).
+it lives at [morethanoneio.vercel.app](https://morethanoneio.vercel.app/)).
 
 ## why this exists
 
