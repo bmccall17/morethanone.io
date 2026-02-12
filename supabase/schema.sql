@@ -67,9 +67,9 @@ create table if not exists events (
   properties jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
-create index idx_events_event_name on events (event_name);
-create index idx_events_round_id on events (round_id);
-create index idx_events_created_at on events (created_at);
+create index if not exists idx_events_event_name on events (event_name);
+create index if not exists idx_events_round_id on events (round_id);
+create index if not exists idx_events_created_at on events (created_at);
 
 -- enable realtime (prep for sprint 2)
 alter publication supabase_realtime add table rounds;

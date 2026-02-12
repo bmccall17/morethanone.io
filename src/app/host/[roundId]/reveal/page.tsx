@@ -49,6 +49,7 @@ export default function HostReveal() {
   const [countdownComplete, setCountdownComplete] = useState(false)
   const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
   const [replayLoading, setReplayLoading] = useState(false)
+  const [replayError, setReplayError] = useState('')
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
 
@@ -224,35 +225,44 @@ export default function HostReveal() {
           </Button>
         </Card>
 
-        <div className="flex gap-3">
-          <Button
-            size="lg"
-            className="flex-1"
-            loading={replayLoading}
-            onClick={async () => {
-              if (!hostToken) return
-              setReplayLoading(true)
-              try {
-                const res = await fetch('/api/rounds/replay', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-Host-Token': hostToken,
-                  },
-                  body: JSON.stringify({ roundId }),
-                })
-                if (res.ok) {
-                  const data = await res.json()
-                  saveHostToken(data.id, data.host_token)
-                  router.push(`/host/${data.id}/lobby`)
+        <div className="space-y-2">
+          <div className="flex gap-3">
+            <Button
+              size="lg"
+              className="flex-1"
+              loading={replayLoading}
+              onClick={async () => {
+                if (!hostToken) return
+                setReplayLoading(true)
+                setReplayError('')
+                try {
+                  const res = await fetch('/api/rounds/replay', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-Host-Token': hostToken,
+                    },
+                    body: JSON.stringify({ roundId }),
+                  })
+                  if (res.ok) {
+                    const data = await res.json()
+                    saveHostToken(data.id, data.host_token)
+                    router.push(`/host/${data.id}/lobby`)
+                  } else {
+                    const err = await res.json().catch(() => ({ error: 'Failed to create new round' }))
+                    setReplayError(err.error || 'Failed to create new round')
+                  }
+                } catch {
+                  setReplayError('Network error — please try again')
+                } finally {
+                  setReplayLoading(false)
                 }
-              } finally {
-                setReplayLoading(false)
-              }
-            }}
-          >
-            Run it again
-          </Button>
+              }}
+            >
+              Run it again
+            </Button>
+          </div>
+          {replayError && <p className="text-sm text-red-600 text-center">{replayError}</p>}
         </div>
       </div>
     </main>

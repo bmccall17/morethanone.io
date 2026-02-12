@@ -46,7 +46,9 @@ export async function POST(request: Request) {
     const newHostToken = crypto.randomUUID()
     const newJoinCode = generateJoinCode()
 
-    const { data: newRound, error: insertError } = await supabase
+    // Try with replay columns first, fall back without them if migration hasn't run
+    let newRound: Record<string, unknown> | null = null
+    const { data: withCols, error: withColsError } = await supabase
       .from('rounds')
       .insert({
         join_code: newJoinCode,
@@ -61,19 +63,49 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (insertError || !newRound) {
-      return NextResponse.json({ error: insertError?.message || 'Failed to create round' }, { status: 500 })
+    if (withColsError) {
+      // Fallback: column may not exist yet — insert without linking columns
+      const { data: fallback, error: fallbackError } = await supabase
+        .from('rounds')
+        .insert({
+          join_code: newJoinCode,
+          prompt: original.prompt,
+          description: original.description,
+          options: original.options,
+          settings: original.settings,
+          status: 'setup',
+          host_token: newHostToken,
+        })
+        .select()
+        .single()
+
+      if (fallbackError || !fallback) {
+        return NextResponse.json({ error: fallbackError?.message || 'Failed to create round' }, { status: 500 })
+      }
+      newRound = fallback
+    } else {
+      newRound = withCols
     }
 
-    // Link old round to new round (triggers realtime for participants)
-    await supabase
-      .from('rounds')
-      .update({ next_round_id: newRound.id })
-      .eq('id', roundId)
+    // Link old round to new round (triggers realtime for participants) — best-effort
+    if (newRound) {
+      try {
+        await supabase
+          .from('rounds')
+          .update({ next_round_id: newRound.id })
+          .eq('id', roundId)
+      } catch {
+        // Column may not exist yet — skip linking
+      }
+    }
+
+    if (!newRound) {
+      return NextResponse.json({ error: 'Failed to create round' }, { status: 500 })
+    }
 
     trackEvent(supabase, 'replay_created', {
       previous_round_id: roundId,
-    }, newRound.id)
+    }, newRound.id as string)
 
     return NextResponse.json({
       id: newRound.id,
