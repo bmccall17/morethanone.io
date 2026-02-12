@@ -27,6 +27,7 @@ export interface Round {
   ranking_started_at: string | null
   previous_round_id: string | null
   next_round_id: string | null
+  is_private: boolean
   created_at: string
 }
 

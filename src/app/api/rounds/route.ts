@@ -15,7 +15,7 @@ function generateJoinCode(): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { prompt, description, options, settings } = body
+    const { prompt, description, options, settings, is_private } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         description: description || null,
         options,
         settings: settings || { allowTies: false, anonymousResults: false, host_as_participant: false, show_processing: false, bot_count: 0 },
+        is_private: is_private || false,
         status: 'setup',
         host_token: hostToken,
       })

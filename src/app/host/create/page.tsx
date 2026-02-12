@@ -43,6 +43,7 @@ function CreateRoundForm() {
   const [options, setOptions] = useState<string[]>(prefillOptions)
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
+  const [isPrivate, setIsPrivate] = useState(false)
   const [timerMinutes, setTimerMinutes] = useState('')
   const [maxRanks, setMaxRanks] = useState('')
   const [loading, setLoading] = useState(false)
@@ -69,6 +70,7 @@ function CreateRoundForm() {
           prompt: prompt.trim(),
           description: description.trim() || null,
           options,
+          is_private: isPrivate,
           settings: {
             allowTies,
             anonymousResults,
@@ -159,6 +161,12 @@ function CreateRoundForm() {
               description="Hide participant names from results"
               checked={anonymousResults}
               onChange={setAnonymousResults}
+            />
+            <Toggle
+              label="Private round"
+              description="Only accessible via code or QR"
+              checked={isPrivate}
+              onChange={setIsPrivate}
             />
             <div>
               <label htmlFor="timer-minutes" className="block text-sm font-medium text-gray-700">

@@ -16,11 +16,13 @@ create table if not exists rounds (
   ranking_started_at timestamptz,
   previous_round_id uuid references rounds(id) on delete set null,
   next_round_id uuid references rounds(id) on delete set null,
+  is_private boolean not null default false,
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_rounds_join_code on rounds (join_code);
 create index if not exists idx_rounds_status on rounds (status);
+create index if not exists idx_rounds_is_private on rounds (is_private);
 
 -- participants table
 create table if not exists participants (
