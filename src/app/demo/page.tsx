@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Toggle from '@/components/ui/Toggle'
 import DemoTallyView from '@/components/demo/DemoTallyView'
+import AboutSection from '@/components/demo/AboutSection'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import { DemoRunner } from '@/lib/demo/engine'
 import { scenarios } from '@/lib/demo/scenarios'
@@ -60,6 +61,9 @@ export default function DemoPage() {
             </p>
           </div>
         </div>
+
+        {/* About section */}
+        <AboutSection />
 
         {/* Controls bar */}
         <Card padding="sm">
