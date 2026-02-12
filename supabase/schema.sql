@@ -17,6 +17,7 @@ create table if not exists rounds (
   previous_round_id uuid references rounds(id) on delete set null,
   next_round_id uuid references rounds(id) on delete set null,
   is_private boolean not null default false,
+  host_heartbeat_at timestamptz,
   created_at timestamptz not null default now()
 );
 

@@ -28,6 +28,7 @@ export interface Round {
   previous_round_id: string | null
   next_round_id: string | null
   is_private: boolean
+  host_heartbeat_at: string | null
   created_at: string
 }
 

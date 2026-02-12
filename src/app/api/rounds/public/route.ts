@@ -6,9 +6,9 @@ export async function GET() {
 
   const { data: rounds, error } = await supabase
     .from('rounds')
-    .select('id, join_code, prompt, status, options, created_at')
+    .select('id, join_code, prompt, status, options, host_heartbeat_at, created_at')
     .eq('is_private', false)
-    .in('status', ['setup', 'ranking'])
+    .in('status', ['setup', 'ranking', 'revealed'])
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -34,6 +34,9 @@ export async function GET() {
     }
   }
 
+  const now = Date.now()
+  const HOST_ACTIVE_THRESHOLD = 60_000 // 60 seconds
+
   const result = rounds.map(r => ({
     id: r.id,
     join_code: r.join_code,
@@ -41,6 +44,9 @@ export async function GET() {
     status: r.status,
     options_count: Array.isArray(r.options) ? r.options.length : 0,
     participant_count: countsByRound[r.id] || 0,
+    host_active: r.host_heartbeat_at
+      ? now - new Date(r.host_heartbeat_at).getTime() < HOST_ACTIVE_THRESHOLD
+      : false,
     created_at: r.created_at,
   }))
 

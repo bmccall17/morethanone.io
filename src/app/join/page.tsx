@@ -16,6 +16,7 @@ interface PublicRound {
   status: string
   options_count: number
   participant_count: number
+  host_active: boolean
   created_at: string
 }
 
@@ -132,37 +133,58 @@ function JoinForm() {
 
         {loadingRounds ? (
           <p className="text-sm text-gray-400 text-center">Loading open rounds...</p>
-        ) : publicRounds.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-medium text-gray-700">Open rounds</h2>
-            <div className="space-y-2">
-              {publicRounds.map(round => (
-                <button
-                  key={round.id}
-                  type="button"
-                  onClick={() => setCode(round.join_code)}
-                  className={`w-full text-left rounded-xl border p-3 transition-colors hover:bg-gray-50 cursor-pointer ${
-                    code === round.join_code
-                      ? 'border-indigo-500 bg-indigo-50/50'
-                      : 'border-gray-200 bg-white'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-1">{round.prompt}</p>
-                    <Badge variant={round.status === 'ranking' ? 'success' : 'info'}>
-                      {round.status === 'ranking' ? 'Ranking' : 'Open'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
-                    <span className="font-mono">{round.join_code}</span>
-                    <span>{round.options_count} options</span>
-                    <span>{round.participant_count} joined</span>
-                  </div>
-                </button>
-              ))}
+        ) : (() => {
+          const visibleRounds = publicRounds.filter(
+            r => !(r.status === 'setup' && !r.host_active)
+          )
+          return visibleRounds.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-medium text-gray-700">Public rounds</h2>
+              <div className="space-y-2">
+                {visibleRounds.map(round => {
+                  const isCompleted = round.status === 'revealed'
+                  const badge = round.status === 'ranking'
+                    ? <Badge variant="warning">Voting</Badge>
+                    : isCompleted
+                      ? <Badge variant="success">Completed</Badge>
+                      : <Badge variant="info">Open</Badge>
+
+                  return (
+                    <button
+                      key={round.id}
+                      type="button"
+                      onClick={() => {
+                        if (isCompleted) {
+                          router.push(`/results/${round.id}`)
+                        } else {
+                          setCode(round.join_code)
+                        }
+                      }}
+                      className={`w-full text-left rounded-xl border p-3 transition-colors hover:bg-gray-50 cursor-pointer ${
+                        !isCompleted && code === round.join_code
+                          ? 'border-indigo-500 bg-indigo-50/50'
+                          : 'border-gray-200 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 line-clamp-1">{round.prompt}</p>
+                        {badge}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                        {isCompleted
+                          ? <span className="text-indigo-600 font-medium">View results</span>
+                          : <span className="font-mono">{round.join_code}</span>
+                        }
+                        <span>{round.options_count} options</span>
+                        <span>{round.participant_count} joined</span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
       </div>
     </main>
   )

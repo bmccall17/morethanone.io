@@ -11,6 +11,7 @@ import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
 import { saveHostToken, getHostToken } from '@/lib/host-token'
+import { useHostHeartbeat } from '@/lib/useHostHeartbeat'
 import { RoundData as EliminationRound } from '@/types/database'
 import type { RevealViewType, RevealViewState } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
@@ -50,6 +51,8 @@ export default function HostReveal() {
   const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
   const [replayLoading, setReplayLoading] = useState(false)
   const [replayError, setReplayError] = useState('')
+
+  useHostHeartbeat(roundId)
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
 

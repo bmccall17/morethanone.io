@@ -13,6 +13,7 @@ import SubmissionCounter from '@/components/SubmissionCounter'
 import CountdownTimer, { computeDeadline } from '@/components/CountdownTimer'
 import { getHostToken, getHostHeaders, saveParticipantId, getParticipantId } from '@/lib/host-token'
 import { subscribeToRound, subscribeToParticipants, subscribeToRankings } from '@/lib/realtime'
+import { useHostHeartbeat } from '@/lib/useHostHeartbeat'
 
 interface RoundData {
   id: string
@@ -46,6 +47,8 @@ export default function HostLobby() {
   const [error, setError] = useState('')
 
   const hostToken = typeof window !== 'undefined' ? getHostToken(roundId) : null
+
+  useHostHeartbeat(roundId)
 
   useEffect(() => {
     async function init() {
