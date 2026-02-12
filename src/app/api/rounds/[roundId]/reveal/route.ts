@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { converge } from '@/lib/engine/converge'
+import { trackEvent } from '@/lib/analytics'
 
 export async function POST(
   request: Request,
@@ -88,6 +89,12 @@ export async function POST(
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
+
+  trackEvent(supabase, 'results_revealed', {
+    rounds_count: result.rounds.length,
+    winner: result.winner,
+    tie_break_used: result.tie_breaks.length > 0,
+  }, roundId)
 
   return NextResponse.json(result)
 }

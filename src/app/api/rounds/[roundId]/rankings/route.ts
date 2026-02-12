@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { RoundSettings } from '@/types/database'
+import { trackEvent } from '@/lib/analytics'
 
 export async function POST(
   request: Request,
@@ -69,6 +70,10 @@ export async function POST(
     if (upsertError) {
       return NextResponse.json({ error: upsertError.message }, { status: 500 })
     }
+
+    trackEvent(supabase, 'ballot_submitted', {
+      ranks_count: ranking.length,
+    }, roundId)
 
     return NextResponse.json({ success: true })
   } catch {

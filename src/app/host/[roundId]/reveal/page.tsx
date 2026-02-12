@@ -10,6 +10,7 @@ import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
 import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
+import { saveHostToken } from '@/lib/host-token'
 import { RoundData as EliminationRound } from '@/types/database'
 import type { RevealViewType, RevealViewState } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
@@ -47,6 +48,7 @@ export default function HostReveal() {
   const [copied, setCopied] = useState(false)
   const [countdownComplete, setCountdownComplete] = useState(false)
   const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
+  const [replayLoading, setReplayLoading] = useState(false)
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
 
@@ -226,14 +228,27 @@ export default function HostReveal() {
           <Button
             size="lg"
             className="flex-1"
-            onClick={() => {
-              const urlParams = new URLSearchParams()
-              if (round) {
-                urlParams.set('prompt', round.prompt)
-                if (round.description) urlParams.set('description', round.description)
-                urlParams.set('options', JSON.stringify(round.options))
+            loading={replayLoading}
+            onClick={async () => {
+              if (!hostToken) return
+              setReplayLoading(true)
+              try {
+                const res = await fetch('/api/rounds/replay', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Host-Token': hostToken,
+                  },
+                  body: JSON.stringify({ roundId }),
+                })
+                if (res.ok) {
+                  const data = await res.json()
+                  saveHostToken(data.id, data.host_token)
+                  router.push(`/host/${data.id}/lobby`)
+                }
+              } finally {
+                setReplayLoading(false)
               }
-              router.push(`/host/create?${urlParams.toString()}`)
             }}
           >
             Run it again

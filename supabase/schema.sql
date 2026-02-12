@@ -14,6 +14,8 @@ create table if not exists rounds (
   current_processing_round integer not null default 0,
   reveal_view_state jsonb,
   ranking_started_at timestamptz,
+  previous_round_id uuid references rounds(id) on delete set null,
+  next_round_id uuid references rounds(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -56,6 +58,18 @@ create table if not exists results (
   summary jsonb not null default '{}'::jsonb,
   computed_at timestamptz not null default now()
 );
+
+-- events table (analytics)
+create table if not exists events (
+  id uuid primary key default gen_random_uuid(),
+  event_name text not null,
+  round_id uuid references rounds(id) on delete set null,
+  properties jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index idx_events_event_name on events (event_name);
+create index idx_events_round_id on events (round_id);
+create index idx_events_created_at on events (created_at);
 
 -- enable realtime (prep for sprint 2)
 alter publication supabase_realtime add table rounds;

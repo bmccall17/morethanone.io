@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
+import ReplayNotification from '@/components/ReplayNotification'
 import { subscribeToRound } from '@/lib/realtime'
 
 export default function WaitingPage() {
   const params = useParams()
   const router = useRouter()
   const roundId = params.roundId as string
+  const [nextRoundJoinCode, setNextRoundJoinCode] = useState<string | null>(null)
+  const [participantName, setParticipantName] = useState<string | undefined>(undefined)
 
   // Check current status on mount (for late arrivals)
   useEffect(() => {
@@ -26,7 +29,21 @@ export default function WaitingPage() {
     checkStatus()
   }, [roundId, router])
 
-  // Subscribe to status changes
+  // Get participant display name
+  useEffect(() => {
+    const participantId = localStorage.getItem(`morethanone:participant:${roundId}`)
+    if (participantId) {
+      fetch(`/api/rounds/${roundId}/participants`)
+        .then(r => r.ok ? r.json() : [])
+        .then(participants => {
+          const me = participants.find?.((p: { id: string }) => p.id === participantId)
+          if (me) setParticipantName(me.display_name)
+        })
+        .catch(() => {})
+    }
+  }, [roundId])
+
+  // Subscribe to status changes + replay
   useEffect(() => {
     return subscribeToRound(roundId, {
       onStatusChange: (status) => {
@@ -35,6 +52,15 @@ export default function WaitingPage() {
         } else if (status === 'revealed') {
           router.push(`/round/${roundId}/reveal`)
         }
+      },
+      onNextRound: async (nextRoundId) => {
+        try {
+          const res = await fetch(`/api/rounds/${nextRoundId}`)
+          if (res.ok) {
+            const data = await res.json()
+            setNextRoundJoinCode(data.join_code)
+          }
+        } catch { /* ignore */ }
       },
     })
   }, [roundId, router])
@@ -71,6 +97,10 @@ export default function WaitingPage() {
             </p>
           </div>
         </Card>
+
+        {nextRoundJoinCode && (
+          <ReplayNotification joinCode={nextRoundJoinCode} displayName={participantName} />
+        )}
       </div>
     </main>
   )

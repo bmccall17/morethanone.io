@@ -4,6 +4,7 @@ import type { Participant, Ranking, RevealViewState } from '@/types/database'
 
 export interface RoundCallbacks {
   onStatusChange: (status: string) => void
+  onNextRound?: (nextRoundId: string) => void
 }
 
 export interface ParticipantCallbacks {
@@ -44,6 +45,10 @@ export function subscribeToRound(
         const oldStatus = payload.old.status
         if (newStatus !== oldStatus) {
           callbacks.onStatusChange(newStatus)
+        }
+        const nextRoundId = payload.new.next_round_id
+        if (nextRoundId && !payload.old.next_round_id && callbacks.onNextRound) {
+          callbacks.onNextRound(nextRoundId)
         }
       }
     )

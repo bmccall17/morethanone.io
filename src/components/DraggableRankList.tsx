@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -10,8 +10,11 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
   useDroppable,
 } from '@dnd-kit/core'
+import { playPickUp, playDrop, playReorder } from '@/lib/sounds'
 import {
   arrayMove,
   SortableContext,
@@ -89,6 +92,19 @@ export default function DraggableRankList({ options, onSubmit, loading, maxRanks
     maxRanks && maxRanks < options.length ? options.slice(maxRanks) : []
   )
   const rankedFull = !!maxRanks && ranked.length >= maxRanks
+  const lastOverId = useRef<string | null>(null)
+
+  const handleDragStart = (_event: DragStartEvent) => {
+    playPickUp()
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const overId = event.over?.id as string | undefined
+    if (overId && overId !== lastOverId.current) {
+      lastOverId.current = overId
+      playReorder()
+    }
+  }
 
   const sensors = useSensors(
     useSensor(TouchSensor, {
@@ -108,6 +124,9 @@ export default function DraggableRankList({ options, onSubmit, loading, maxRanks
   )
 
   function handleDragEnd(event: DragEndEvent) {
+    lastOverId.current = null
+    playDrop()
+
     const { active, over } = event
     if (!over) return
 
@@ -182,6 +201,8 @@ export default function DraggableRankList({ options, onSubmit, loading, maxRanks
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         {/* Ranked zone */}

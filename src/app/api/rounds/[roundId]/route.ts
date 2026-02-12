@@ -10,7 +10,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('rounds')
-    .select('id, join_code, prompt, description, options, settings, status, reveal_view_state, ranking_started_at, created_at')
+    .select('id, join_code, prompt, description, options, settings, status, reveal_view_state, ranking_started_at, previous_round_id, next_round_id, created_at')
     .eq('id', roundId)
     .single()
 

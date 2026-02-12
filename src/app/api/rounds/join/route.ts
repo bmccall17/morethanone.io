@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { containsProfanity } from '@/lib/profanity'
+import { trackEvent } from '@/lib/analytics'
 
 export async function POST(request: Request) {
   try {
@@ -47,6 +48,10 @@ export async function POST(request: Request) {
     if (participantError) {
       return NextResponse.json({ error: participantError.message }, { status: 500 })
     }
+
+    const ua = request.headers.get('user-agent') || ''
+    const device = /Mobile|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop'
+    trackEvent(supabase, 'player_joined', { device }, round.id)
 
     return NextResponse.json({
       participantId: participant.id,

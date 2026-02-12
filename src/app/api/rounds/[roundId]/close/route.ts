@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { trackEvent } from '@/lib/analytics'
 
 export async function POST(
   request: Request,
@@ -40,6 +41,16 @@ export async function POST(
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
+
+  // Track analytics — get participant and ranking counts
+  const [{ count: playersJoined }, { count: ballotsSubmitted }] = await Promise.all([
+    supabase.from('participants').select('*', { count: 'exact', head: true }).eq('round_id', roundId).eq('removed', false),
+    supabase.from('rankings').select('*', { count: 'exact', head: true }).eq('round_id', roundId),
+  ])
+  trackEvent(supabase, 'round_closed', {
+    players_joined: playersJoined || 0,
+    ballots_submitted: ballotsSubmitted || 0,
+  }, roundId)
 
   return NextResponse.json({ status: 'closed' })
 }

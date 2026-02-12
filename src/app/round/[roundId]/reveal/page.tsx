@@ -10,7 +10,9 @@ import RevealViewSwitcher from '@/components/reveal/RevealViewSwitcher'
 import DemoTallyView from '@/components/demo/DemoTallyView'
 import SelectionGridView from '@/components/reveal/SelectionGridView'
 import FullResultsTableView from '@/components/reveal/FullResultsTableView'
+import ReplayNotification from '@/components/ReplayNotification'
 import { subscribeToRevealView } from '@/lib/realtime'
+import { subscribeToRound } from '@/lib/realtime'
 import { RoundData as EliminationRound } from '@/types/database'
 import type { RevealViewState } from '@/types/database'
 import type { ConvergeResult } from '@/lib/engine/types'
@@ -47,6 +49,8 @@ export default function PlayerReveal() {
   const [copied, setCopied] = useState(false)
   const [countdownComplete, setCountdownComplete] = useState(false)
   const [viewState, setViewState] = useState<RevealViewState>({ view: 'animation', animationRound: 1 })
+  const [nextRoundJoinCode, setNextRoundJoinCode] = useState<string | null>(null)
+  const [participantName, setParticipantName] = useState<string | undefined>(undefined)
 
   const shareUrl = result?.share_url || `${typeof window !== 'undefined' ? window.location.origin : ''}/results/${roundId}`
 
@@ -84,6 +88,47 @@ export default function PlayerReveal() {
       onRevealViewChange: (state) => setViewState(state),
     })
     return unsubscribe
+  }, [roundId])
+
+  // Subscribe to replay (next_round_id)
+  useEffect(() => {
+    // Get participant's display name from localStorage
+    const participantId = localStorage.getItem(`morethanone:participant:${roundId}`)
+    if (participantId) {
+      fetch(`/api/rounds/${roundId}/participants`)
+        .then(r => r.ok ? r.json() : [])
+        .then(participants => {
+          const me = participants.find?.((p: { id: string }) => p.id === participantId)
+          if (me) setParticipantName(me.display_name)
+        })
+        .catch(() => {})
+    }
+
+    // Check if round already has next_round_id
+    fetch(`/api/rounds/${roundId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.next_round_id) {
+          fetch(`/api/rounds/${data.next_round_id}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(next => { if (next) setNextRoundJoinCode(next.join_code) })
+            .catch(() => {})
+        }
+      })
+      .catch(() => {})
+
+    return subscribeToRound(roundId, {
+      onStatusChange: () => {},
+      onNextRound: async (nextRoundId) => {
+        try {
+          const res = await fetch(`/api/rounds/${nextRoundId}`)
+          if (res.ok) {
+            const data = await res.json()
+            setNextRoundJoinCode(data.join_code)
+          }
+        } catch { /* ignore */ }
+      },
+    })
   }, [roundId])
 
   if (loading) {
@@ -185,6 +230,10 @@ export default function PlayerReveal() {
             {copied ? 'Copied!' : 'Share Results'}
           </Button>
         </Card>
+
+        {nextRoundJoinCode && (
+          <ReplayNotification joinCode={nextRoundJoinCode} displayName={participantName} />
+        )}
       </div>
     </main>
   )

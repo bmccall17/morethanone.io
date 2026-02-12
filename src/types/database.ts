@@ -25,6 +25,8 @@ export interface Round {
   current_processing_round: number
   reveal_view_state: RevealViewState
   ranking_started_at: string | null
+  previous_round_id: string | null
+  next_round_id: string | null
   created_at: string
 }
 

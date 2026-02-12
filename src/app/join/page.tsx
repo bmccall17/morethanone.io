@@ -20,6 +20,8 @@ function JoinForm() {
   useEffect(() => {
     const prefillCode = searchParams.get('code')
     if (prefillCode) setCode(prefillCode.toUpperCase())
+    const prefillName = searchParams.get('name')
+    if (prefillName) setDisplayName(prefillName)
   }, [searchParams])
 
   async function handleJoin() {

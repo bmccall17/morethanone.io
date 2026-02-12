@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { containsProfanity } from '@/lib/profanity'
+import { trackEvent } from '@/lib/analytics'
 
 function generateJoinCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -48,6 +49,14 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    const roundSettings = settings || {}
+    trackEvent(supabase, 'round_created', {
+      options_count: options.length,
+      max_ranks: roundSettings.max_ranks || null,
+      anonymous: roundSettings.anonymousResults || false,
+      timer: roundSettings.timer_minutes || null,
+    }, data.id)
 
     return NextResponse.json({
       id: data.id,
