@@ -25,20 +25,12 @@ working list of features and tasks to implement next. move items to `prdparkingl
 
 - [ ] shareable result card image export (OG image or canvas-based screenshot)
 
-## ranking UX
-
-- [ ] drag sounds / haptics on mobile (unblocked — mobile drag fix shipped in v0.0.7)
-
-## analytics
-
-- [ ] event instrumentation: round_created, player_joined, ballot_submitted, round_closed, results_revealed
-- [ ] quality metrics dashboard: completion rate, time to converge, rounds distribution, tie-break frequency
-
 ## post-round
 
 - [ ] "felt fair?" quick pulse (1-question emoji scale after reveal)
-- [ ] "run it again" flow improvements (carry over participants?)
 
 ---
 
 *sprint 6 shipped as v0.0.7 on feb 11, 2026: mobile drag-and-drop fix, host remove player/option, profanity filter, timer, max ranks, fun name generator, countdown reveal, edge case fixes.*
+
+*sprint 7 shipped as v0.0.8 on feb 11, 2026: analytics instrumentation (6 events + Vercel Analytics), drag sounds/haptics, metrics dashboard, "run it again" server-side replay with participant notification, poll templates, bot RNG improvement.*

@@ -14,12 +14,6 @@ ideas and features that are interesting but not prioritized. move items to `prdn
 ## post-round
 
 - "felt fair?" quick pulse (1-question emoji scale after reveal)
-- "run it again" flow improvements (carry over participants?)
-
-## analytics
-
-- event instrumentation: round_created, player_joined, ballot_submitted, round_closed, results_revealed
-- quality metrics dashboard: completion rate, time to converge, rounds distribution, tie-break frequency
 
 ## pol.is — deeper integrations
 
