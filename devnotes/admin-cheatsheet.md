@@ -88,6 +88,16 @@ If `CRON_SECRET` doesn't appear automatically after deploy, add it manually with
 3. Save as Draft, review, then set to **Published**
 4. Published examples appear on `/rcv-world` public page
 
+### RCV World — Import from Article
+1. On the **New Example** page, paste an article URL into the import box
+2. Click **Fetch & Extract**
+3. **With `GEMINI_API_KEY`**: AI extracts title, location, category, description, outcome, lessons → all fields pre-filled (indigo banner)
+4. **Without `GEMINI_API_KEY`**: Title auto-fills from page metadata, article text shown in a collapsible read-only area for manual reference (amber banner)
+5. Source URL is auto-appended to the Source URLs field
+6. All fields remain fully editable — review before saving
+
+**Optional env var**: Add `GEMINI_API_KEY` in Vercel (or `.env.local`) to enable AI extraction via Gemini Flash. Without it, import still works in manual-assist mode.
+
 ---
 
 ## API Reference
@@ -134,6 +144,7 @@ GET    /api/admin/rcv-world?status=&category=&q=   # list with filters
 POST   /api/admin/rcv-world            # {title, location, region, event_date, category, description, outcome, lessons, source_urls[], status}
 PUT    /api/admin/rcv-world/:id
 DELETE /api/admin/rcv-world/:id
+POST   /api/admin/rcv-world/import     # {url} → AI or manual extraction
 GET    /api/content/rcv-world          # PUBLIC — published only
 ```
 
