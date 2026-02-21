@@ -74,3 +74,6 @@ ideas and features that are interesting but not prioritized. move items to `prdn
 - aggregated insights across multiple rounds ("your group tends to...")
 - export round data as CSV
 - API for third-party integrations
+
+## research of real RCV results:
++ https://www.sfelections.org/results/20241105/final/round-pages/mayor_short-rounds-en.html

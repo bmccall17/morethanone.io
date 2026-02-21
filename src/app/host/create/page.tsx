@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -27,6 +27,12 @@ const POLL_TEMPLATES = [
   },
 ]
 
+interface PollTemplate {
+  label: string
+  prompt: string
+  options: string[]
+}
+
 function CreateRoundForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,6 +47,15 @@ function CreateRoundForm() {
   const [prompt, setPrompt] = useState(prefillPrompt)
   const [description, setDescription] = useState(prefillDescription)
   const [options, setOptions] = useState<string[]>(prefillOptions)
+  const [templates, setTemplates] = useState<PollTemplate[]>(POLL_TEMPLATES)
+
+  useEffect(() => {
+    fetch('/api/content/templates')
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then((data: PollTemplate[]) => { if (data.length > 0) setTemplates(data) })
+      .catch(() => {}) // keep hardcoded fallback
+  }, [])
+
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
@@ -107,7 +122,7 @@ function CreateRoundForm() {
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">Start from a template</p>
             <div className="flex flex-wrap gap-2">
-              {POLL_TEMPLATES.map((t) => (
+              {templates.map((t) => (
                 <button
                   key={t.label}
                   type="button"
