@@ -1,7 +1,10 @@
 /**
  * HTML processing utilities for article import.
- * Pure regex — no dependencies.
+ * Uses @mozilla/readability + linkedom for article extraction.
  */
+
+import { Readability } from '@mozilla/readability'
+import { parseHTML } from 'linkedom'
 
 export interface ArticleMetadata {
   title: string
@@ -24,96 +27,44 @@ export function extractMetadata(html: string): ArticleMetadata {
 }
 
 export function htmlToText(html: string, maxLength = 8000): string {
-  // Try to isolate the main article content before stripping tags.
-  // Priority: <article>, then <main>, then [role="main"], then fall back to <body> or full HTML.
-  const articleBody = extractContentBlock(html)
+  // Try Readability extraction first
+  try {
+    const { document } = parseHTML(html)
+    const reader = new Readability(document)
+    const article = reader.parse()
 
-  let text = articleBody
+    if (article?.textContent && article.textContent.trim().length > 100) {
+      let text = article.textContent
+      text = text.replace(/[ \t]+/g, ' ')
+      text = text.replace(/\n\s*\n/g, '\n\n')
+      text = text.trim()
 
-  // Remove script, style, nav, footer, aside, header, sidebar blocks that may be nested inside article
+      if (text.length > maxLength) {
+        text = text.slice(0, maxLength) + '...'
+      }
+      return text
+    }
+  } catch {
+    // Fall through to regex fallback
+  }
+
+  // Regex fallback — intentionally simple, just gives Gemini something to work with
+  let text = html
   text = text.replace(/<(script|style|nav|footer|aside|header|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
-
-  // Remove common sidebar/related-content patterns by class/id
-  text = text.replace(/<(div|section|ul|ol)\b[^>]*(?:class|id)=["'][^"']*(?:sidebar|related|trending|popular|recommended|newsletter|social-share|comment|advertisement|ad-slot|promo)[^"']*["'][^>]*>[\s\S]*?<\/\1>/gi, ' ')
-
-  // Remove HTML comments
   text = text.replace(/<!--[\s\S]*?-->/g, ' ')
-
-  // Replace block-level tags with newlines
   text = text.replace(/<\/(p|div|h[1-6]|li|tr|br|blockquote|article|section)>/gi, '\n')
   text = text.replace(/<br\s*\/?>/gi, '\n')
-
-  // Remove all remaining tags
   text = text.replace(/<[^>]+>/g, ' ')
-
-  // Decode HTML entities
   text = decodeEntities(text)
-
-  // Collapse whitespace
   text = text.replace(/[ \t]+/g, ' ')
   text = text.replace(/\n\s*\n/g, '\n\n')
   text = text.trim()
 
-  // Truncate
   if (text.length > maxLength) {
     text = text.slice(0, maxLength) + '...'
   }
 
   return text
-}
-
-/**
- * Try to extract the main content block from full HTML.
- * Checks for <article>, <main>, [role="main"], then common content-class divs,
- * then falls back to <body>, then the full HTML.
- */
-function extractContentBlock(html: string): string {
-  // 1. <article> tag — most news sites wrap the story here
-  const articleMatch = html.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i)
-  if (articleMatch && articleMatch[1].length > 200) {
-    return articleMatch[1]
-  }
-
-  // 2. <main> tag
-  const mainMatch = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)
-  if (mainMatch && mainMatch[1].length > 200) {
-    return mainMatch[1]
-  }
-
-  // 3. [role="main"]
-  const roleMainMatch = html.match(/<\w+\b[^>]*role=["']main["'][^>]*>([\s\S]*?)<\/\w+>/i)
-  if (roleMainMatch && roleMainMatch[1].length > 200) {
-    return roleMainMatch[1]
-  }
-
-  // 4. Common content-class div patterns used by news sites / CMS platforms
-  const contentPatterns = [
-    /class=["'][^"']*(?:article-body|article-content|post-content|entry-content|story-body|story-content|page-content|content-body)[^"']*["']/i,
-  ]
-  for (const pattern of contentPatterns) {
-    const classMatch = html.match(pattern)
-    if (classMatch) {
-      // Find the opening tag position
-      const tagStart = html.lastIndexOf('<', classMatch.index!)
-      const snippet = html.slice(tagStart)
-      // Extract the tag name to find its closing tag
-      const tagName = snippet.match(/^<(\w+)/)?.[1]
-      if (tagName) {
-        const innerMatch = snippet.match(new RegExp(`^<${tagName}\\b[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i'))
-        if (innerMatch && innerMatch[1].length > 200) {
-          return innerMatch[1]
-        }
-      }
-    }
-  }
-
-  // 5. Fall back to <body>
-  const bodyMatch = html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)
-  if (bodyMatch) {
-    return bodyMatch[1]
-  }
-
-  return html
 }
 
 function decodeEntities(text: string): string {
