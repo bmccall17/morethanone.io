@@ -10,8 +10,8 @@ import Input from '@/components/ui/Input'
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
 
 type ImportResult =
-  | { mode: 'ai'; fields: Record<string, string> }
-  | { mode: 'manual'; title: string; og_description: string; article_text: string }
+  | { mode: 'ai'; fields: Record<string, string>; diagnostics?: Record<string, unknown> }
+  | { mode: 'manual'; title: string; og_description: string; article_text: string; diagnostics?: Record<string, unknown> }
 
 export default function NewRCVWorldPage() {
   const router = useRouter()
@@ -38,6 +38,7 @@ export default function NewRCVWorldPage() {
   const [importBanner, setImportBanner] = useState('')
   const [articleText, setArticleText] = useState('')
   const [showArticleText, setShowArticleText] = useState(false)
+  const [importDiag, setImportDiag] = useState<Record<string, unknown> | null>(null)
 
   async function handleImport() {
     if (!importUrl.trim()) { setImportError('Enter a URL'); return }
@@ -61,6 +62,8 @@ export default function NewRCVWorldPage() {
       }
 
       const data: ImportResult = await res.json()
+      console.log('[import result]', data)
+      setImportDiag(data.diagnostics || null)
 
       // Auto-append source URL
       const existingUrls = form.source_urls_text.trim()
@@ -172,6 +175,14 @@ export default function NewRCVWorldPage() {
               <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
                 Title auto-filled. Article text available below for manual reference.
               </div>
+            )}
+            {importDiag && (
+              <details className="text-xs text-gray-500">
+                <summary className="cursor-pointer hover:text-gray-700 font-medium">Debug info</summary>
+                <pre className="mt-2 p-3 rounded-lg bg-gray-100 border border-gray-200 overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+                  {JSON.stringify(importDiag, null, 2)}
+                </pre>
+              </details>
             )}
             {articleText && (
               <div>

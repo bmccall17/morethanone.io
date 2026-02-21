@@ -44,8 +44,8 @@ export function htmlToText(html: string, maxLength = 8000): string {
       }
       return text
     }
-  } catch {
-    // Fall through to regex fallback
+  } catch (err) {
+    console.log('[htmlToText] Readability failed, using regex fallback:', err instanceof Error ? err.message : err)
   }
 
   // Regex fallback — intentionally simple, just gives Gemini something to work with
