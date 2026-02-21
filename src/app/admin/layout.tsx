@@ -9,7 +9,7 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
 const NAV_ITEMS = [
-  { href: '/admin/metrics', label: 'Metrics' },
+  { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/content', label: 'Content' },
   { href: '/admin/templates', label: 'Templates' },
   { href: '/admin/faqs', label: 'FAQs' },
@@ -24,11 +24,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [secret, setSecret] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  // Metrics page has its own auth flow, let it through
-  if (pathname === '/admin/metrics') {
-    return <>{children}</>
-  }
 
   if (!isAuthed) {
     return (
@@ -75,19 +70,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <nav className="border-b border-gray-200 bg-white px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center gap-1 overflow-x-auto">
           <span className="text-sm font-semibold text-gray-900 mr-3 shrink-0">Admin</span>
-          {NAV_ITEMS.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium shrink-0 transition-colors ${
-                pathname.startsWith(item.href)
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map(item => {
+            const isActive = 'exact' in item && item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium shrink-0 transition-colors ${
+                  isActive
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </div>
       </nav>
       {children}
