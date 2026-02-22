@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { verifyAdminAuth } from '@/lib/admin-auth'
 import { extractMetadata, htmlToText } from '@/lib/html-to-text'
 
-export const maxDuration = 10
+export const maxDuration = 30
 
 const GEMINI_PROMPT = `You are analyzing a web article about Ranked Choice Voting (RCV), also known as instant-runoff voting or preferential voting. Extract structured information from the article text below.
 
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
   if (geminiKey) {
     try {
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 8000)
+      const timeout = setTimeout(() => controller.abort(), 20000)
 
       const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
