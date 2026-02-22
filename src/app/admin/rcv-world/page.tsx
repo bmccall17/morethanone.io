@@ -15,11 +15,13 @@ interface RCVExample {
   region: string
   event_date: string | null
   category: string
+  content_types: string[]
   status: string
   created_at: string
 }
 
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
+const CONTENT_TYPES = ['example', 'resource', 'news']
 
 export default function RCVWorldAdminPage() {
   const { fetcher } = useAdminAuth()
@@ -27,18 +29,20 @@ export default function RCVWorldAdminPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
+  const [filterContentType, setFilterContentType] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
 
   const load = useCallback(async () => {
     const params = new URLSearchParams()
     if (search) params.set('q', search)
     if (filterCategory) params.set('category', filterCategory)
+    if (filterContentType) params.set('content_type', filterContentType)
     if (filterStatus) params.set('status', filterStatus)
 
     const res = await fetcher(`/api/admin/rcv-world?${params}`)
     if (res.ok) setItems(await res.json())
     setLoading(false)
-  }, [fetcher, search, filterCategory, filterStatus])
+  }, [fetcher, search, filterCategory, filterContentType, filterStatus])
 
   useEffect(() => { load() }, [load])
 
@@ -63,6 +67,13 @@ export default function RCVWorldAdminPage() {
       election: 'info', referendum: 'warning', community: 'success', corporate: 'default', other: 'default',
     }
     return map[cat] || 'default'
+  }
+
+  const contentTypeVariant = (ct: string) => {
+    const map: Record<string, 'default' | 'success' | 'warning' | 'error' | 'info'> = {
+      example: 'info', resource: 'success', news: 'warning',
+    }
+    return map[ct] || 'default'
   }
 
   if (loading) {
@@ -101,6 +112,17 @@ export default function RCVWorldAdminPage() {
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+              <select
+                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                value={filterContentType}
+                onChange={e => setFilterContentType(e.target.value)}
+              >
+                <option value="">All types</option>
+                {CONTENT_TYPES.map(ct => <option key={ct} value={ct}>{ct}</option>)}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
@@ -119,8 +141,11 @@ export default function RCVWorldAdminPage() {
           <Card key={item.id}>
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <Badge variant={categoryVariant(item.category)}>{item.category}</Badge>
+                  {(item.content_types || ['example']).map(ct => (
+                    <Badge key={ct} variant={contentTypeVariant(ct)}>{ct}</Badge>
+                  ))}
                   <Badge variant={item.status === 'published' ? 'success' : 'default'}>{item.status}</Badge>
                 </div>
                 <h3 className="text-base font-semibold text-gray-900">{item.title}</h3>

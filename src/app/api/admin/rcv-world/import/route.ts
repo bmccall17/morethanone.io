@@ -17,6 +17,11 @@ Return a JSON object with these fields (use empty string "" if not found):
   - community: advocacy, adoption efforts, educational content, opinion pieces
   - corporate: corporate/organizational use of RCV
   - other: anything that doesn't fit above
+- content_types: An array of one or more of: "example", "resource", "news"
+  - "example": describes a specific real-world use of RCV with outcomes
+  - "resource": educational, explanatory, or serves as a reference about RCV
+  - "news": reporting on current/recent RCV events, opinion pieces about RCV developments
+  A single article can be multiple types. For instance, a news article about a specific election result could be ["example", "news"]. An educational explainer could be ["resource"]. An opinion piece about recent developments could be ["resource", "news"].
 - description: 2-4 sentence summary of what the article covers regarding RCV
 - outcome: What was the result or current status? Use "" if not applicable
 - lessons: Key takeaways or lessons about RCV from this article. Use "" if none
@@ -137,6 +142,13 @@ export async function POST(request: Request) {
             if (fields.category && !validCategories.includes(fields.category)) {
               fields.category = 'other'
             }
+            // Validate content_types
+            const validContentTypes = ['example', 'resource', 'news']
+            let content_types: string[] = ['example']
+            if (Array.isArray(fields.content_types)) {
+              const filtered = fields.content_types.filter((t: string) => validContentTypes.includes(t))
+              if (filtered.length > 0) content_types = filtered
+            }
             console.log('[import]', diag)
             return NextResponse.json({
               mode: 'ai',
@@ -146,6 +158,7 @@ export async function POST(request: Request) {
                 region: fields.region || '',
                 event_date: fields.event_date || '',
                 category: fields.category || 'other',
+                content_types,
                 description: fields.description || '',
                 outcome: fields.outcome || '',
                 lessons: fields.lessons || '',

@@ -8,9 +8,10 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
+const CONTENT_TYPES = ['example', 'resource', 'news'] as const
 
 type ImportResult =
-  | { mode: 'ai'; fields: Record<string, string>; diagnostics?: Record<string, unknown> }
+  | { mode: 'ai'; fields: Record<string, string | string[]>; diagnostics?: Record<string, unknown> }
   | { mode: 'manual'; title: string; og_description: string; article_text: string; diagnostics?: Record<string, unknown> }
 
 export default function NewRCVWorldPage() {
@@ -22,6 +23,7 @@ export default function NewRCVWorldPage() {
     region: '',
     event_date: '',
     category: 'other',
+    content_types: ['example'] as string[],
     description: '',
     outcome: '',
     lessons: '',
@@ -34,6 +36,7 @@ export default function NewRCVWorldPage() {
   // Import state
   const [importUrl, setImportUrl] = useState('')
   const [importing, setImporting] = useState(false)
+  const [importStep, setImportStep] = useState<'idle' | 'fetching' | 'analyzing'>('idle')
   const [importError, setImportError] = useState('')
   const [importBanner, setImportBanner] = useState('')
   const [articleText, setArticleText] = useState('')
@@ -43,9 +46,13 @@ export default function NewRCVWorldPage() {
   async function handleImport() {
     if (!importUrl.trim()) { setImportError('Enter a URL'); return }
     setImporting(true)
+    setImportStep('fetching')
     setImportError('')
     setImportBanner('')
     setArticleText('')
+
+    // Switch to "analyzing" after 3s (fetch is typically fast, AI takes longer)
+    const stepTimer = setTimeout(() => setImportStep('analyzing'), 3000)
 
     try {
       const res = await fetcher('/api/admin/rcv-world/import', {
@@ -54,10 +61,13 @@ export default function NewRCVWorldPage() {
         body: JSON.stringify({ url: importUrl.trim() }),
       })
 
+      clearTimeout(stepTimer)
+
       if (!res.ok) {
         const data = await res.json()
         setImportError(data.error || 'Import failed')
         setImporting(false)
+        setImportStep('idle')
         return
       }
 
@@ -72,16 +82,18 @@ export default function NewRCVWorldPage() {
         : importUrl.trim()
 
       if (data.mode === 'ai') {
+        const f = data.fields
         setForm(prev => ({
           ...prev,
-          title: data.fields.title || prev.title,
-          location: data.fields.location || prev.location,
-          region: data.fields.region || prev.region,
-          event_date: data.fields.event_date || prev.event_date,
-          category: data.fields.category || prev.category,
-          description: data.fields.description || prev.description,
-          outcome: data.fields.outcome || prev.outcome,
-          lessons: data.fields.lessons || prev.lessons,
+          title: (typeof f.title === 'string' ? f.title : '') || prev.title,
+          location: (typeof f.location === 'string' ? f.location : '') || prev.location,
+          region: (typeof f.region === 'string' ? f.region : '') || prev.region,
+          event_date: (typeof f.event_date === 'string' ? f.event_date : '') || prev.event_date,
+          category: (typeof f.category === 'string' ? f.category : '') || prev.category,
+          content_types: Array.isArray(f.content_types) ? f.content_types as string[] : prev.content_types,
+          description: (typeof f.description === 'string' ? f.description : '') || prev.description,
+          outcome: (typeof f.outcome === 'string' ? f.outcome : '') || prev.outcome,
+          lessons: (typeof f.lessons === 'string' ? f.lessons : '') || prev.lessons,
           source_urls_text: newSourceUrls,
         }))
         setImportBanner('ai')
@@ -98,10 +110,12 @@ export default function NewRCVWorldPage() {
         setImportBanner('manual')
       }
     } catch {
+      clearTimeout(stepTimer)
       setImportError('Network error — could not reach import endpoint')
     }
 
     setImporting(false)
+    setImportStep('idle')
   }
 
   async function handleCreate() {
@@ -123,6 +137,7 @@ export default function NewRCVWorldPage() {
         region: form.region,
         event_date: form.event_date || null,
         category: form.category,
+        content_types: form.content_types,
         description: form.description,
         outcome: form.outcome,
         lessons: form.lessons,
@@ -165,6 +180,15 @@ export default function NewRCVWorldPage() {
                 Fetch &amp; Extract
               </Button>
             </div>
+            {importing && importStep !== 'idle' && (
+              <div className="flex items-center gap-2 text-sm text-indigo-600">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {importStep === 'fetching' ? 'Fetching article...' : 'Analyzing with AI...'}
+              </div>
+            )}
             {importError && <p className="text-sm text-red-600">{importError}</p>}
             {importBanner === 'ai' && (
               <div className="rounded-lg bg-indigo-50 border border-indigo-200 px-4 py-3 text-sm text-indigo-800">
@@ -223,6 +247,29 @@ export default function NewRCVWorldPage() {
                 >
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content Types</label>
+              <div className="flex gap-4">
+                {CONTENT_TYPES.map(ct => (
+                  <label key={ct} className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.content_types.includes(ct)}
+                      onChange={e => {
+                        setForm(prev => {
+                          const next = e.target.checked
+                            ? [...prev.content_types, ct]
+                            : prev.content_types.filter(t => t !== ct)
+                          return { ...prev, content_types: next.length > 0 ? next : ['example'] }
+                        })
+                      }}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="capitalize">{ct}</span>
+                  </label>
+                ))}
               </div>
             </div>
             <div>

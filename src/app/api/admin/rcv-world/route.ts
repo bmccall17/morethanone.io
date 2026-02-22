@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
   const category = searchParams.get('category')
+  const content_type = searchParams.get('content_type')
   const q = searchParams.get('q')
 
   const supabase = await createClient()
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
 
   if (status) query = query.eq('status', status)
   if (category) query = query.eq('category', category)
+  if (content_type) query = query.contains('content_types', JSON.stringify([content_type]))
   if (q) query = query.or(`title.ilike.%${q}%,location.ilike.%${q}%,description.ilike.%${q}%`)
 
   const { data, error } = await query
@@ -39,6 +41,16 @@ export async function POST(request: Request) {
   const body = await request.json()
   const supabase = await createClient()
 
+  // Validate content_types
+  const validContentTypes = ['example', 'resource', 'news']
+  let content_types = body.content_types
+  if (Array.isArray(content_types)) {
+    content_types = content_types.filter((t: string) => validContentTypes.includes(t))
+  }
+  if (!Array.isArray(content_types) || content_types.length === 0) {
+    content_types = ['example']
+  }
+
   const { data, error } = await supabase
     .from('rcv_world_examples')
     .insert({
@@ -51,6 +63,7 @@ export async function POST(request: Request) {
       outcome: body.outcome || '',
       lessons: body.lessons || '',
       source_urls: body.source_urls || [],
+      content_types,
       status: body.status || 'draft',
     })
     .select()

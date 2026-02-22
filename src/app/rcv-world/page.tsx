@@ -11,6 +11,7 @@ interface RCVExample {
   region: string
   event_date: string | null
   category: string
+  content_types: string[]
   description: string
   outcome: string
   lessons: string
@@ -18,10 +19,12 @@ interface RCVExample {
 }
 
 const CATEGORIES = ['all', 'election', 'referendum', 'community', 'corporate', 'other']
+const CONTENT_TYPE_FILTERS = ['all types', 'example', 'resource', 'news']
 
 export default function RCVWorldPage() {
   const [examples, setExamples] = useState<RCVExample[]>([])
   const [filter, setFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all types')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
 
@@ -41,13 +44,24 @@ export default function RCVWorldPage() {
     })
   }
 
-  const filtered = filter === 'all' ? examples : examples.filter(e => e.category === filter)
+  const filtered = examples.filter(e => {
+    if (filter !== 'all' && e.category !== filter) return false
+    if (typeFilter !== 'all types' && !(e.content_types || ['example']).includes(typeFilter)) return false
+    return true
+  })
 
   const categoryVariant = (cat: string) => {
     const map: Record<string, 'default' | 'success' | 'warning' | 'error' | 'info'> = {
       election: 'info', referendum: 'warning', community: 'success', corporate: 'default', other: 'default',
     }
     return map[cat] || 'default'
+  }
+
+  const contentTypeVariant = (ct: string) => {
+    const map: Record<string, 'default' | 'success' | 'warning' | 'error' | 'info'> = {
+      example: 'info', resource: 'success', news: 'warning',
+    }
+    return map[ct] || 'default'
   }
 
   if (loading) {
@@ -66,20 +80,37 @@ export default function RCVWorldPage() {
           <p className="text-gray-500 mt-1">Real examples of ranked choice voting in action.</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
-                filter === cat
-                  ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
+                  filter === cat
+                    ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {CONTENT_TYPE_FILTERS.map(ct => (
+              <button
+                key={ct}
+                onClick={() => setTypeFilter(ct)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
+                  typeFilter === ct
+                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {ct}
+              </button>
+            ))}
+          </div>
         </div>
 
         {filtered.length === 0 ? (
@@ -95,8 +126,11 @@ export default function RCVWorldPage() {
                 <button onClick={() => toggle(ex.id)} className="w-full text-left">
                   <div className="flex items-start justify-between">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <Badge variant={categoryVariant(ex.category)}>{ex.category}</Badge>
+                        {(ex.content_types || ['example']).map(ct => (
+                          <Badge key={ct} variant={contentTypeVariant(ct)}>{ct}</Badge>
+                        ))}
                         {ex.event_date && (
                           <span className="text-xs text-gray-400">
                             {new Date(ex.event_date).toLocaleDateString()}

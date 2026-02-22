@@ -135,6 +135,7 @@ create table if not exists rcv_world_examples (
   outcome text not null default '',
   lessons text not null default '',
   source_urls jsonb not null default '[]'::jsonb,
+  content_types jsonb not null default '["example"]'::jsonb,
   status text not null default 'draft' check (status in ('draft', 'published')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

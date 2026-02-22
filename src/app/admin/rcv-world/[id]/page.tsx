@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
+const CONTENT_TYPES = ['example', 'resource', 'news'] as const
 
 interface RCVExample {
   id: string
@@ -16,6 +17,7 @@ interface RCVExample {
   region: string
   event_date: string | null
   category: string
+  content_types: string[]
   description: string
   outcome: string
   lessons: string
@@ -33,6 +35,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
     region: '',
     event_date: '',
     category: 'other',
+    content_types: ['example'] as string[],
     description: '',
     outcome: '',
     lessons: '',
@@ -53,6 +56,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
           region: data.region,
           event_date: data.event_date || '',
           category: data.category,
+          content_types: Array.isArray(data.content_types) && data.content_types.length > 0 ? data.content_types : ['example'],
           description: data.description,
           outcome: data.outcome,
           lessons: data.lessons,
@@ -82,6 +86,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
         region: form.region,
         event_date: form.event_date || null,
         category: form.category,
+        content_types: form.content_types,
         description: form.description,
         outcome: form.outcome,
         lessons: form.lessons,
@@ -129,6 +134,29 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
                 >
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content Types</label>
+              <div className="flex gap-4">
+                {CONTENT_TYPES.map(ct => (
+                  <label key={ct} className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.content_types.includes(ct)}
+                      onChange={e => {
+                        setForm(prev => {
+                          const next = e.target.checked
+                            ? [...prev.content_types, ct]
+                            : prev.content_types.filter(t => t !== ct)
+                          return { ...prev, content_types: next.length > 0 ? next : ['example'] }
+                        })
+                      }}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="capitalize">{ct}</span>
+                  </label>
+                ))}
               </div>
             </div>
             <div>

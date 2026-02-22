@@ -31,6 +31,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const body = await request.json()
   const supabase = await createClient()
 
+  // Validate content_types if provided
+  let content_types_update: Record<string, string[]> = {}
+  if (body.content_types !== undefined) {
+    const validContentTypes = ['example', 'resource', 'news']
+    let ct = body.content_types
+    if (Array.isArray(ct)) {
+      ct = ct.filter((t: string) => validContentTypes.includes(t))
+    }
+    if (Array.isArray(ct) && ct.length > 0) {
+      content_types_update = { content_types: ct }
+    }
+  }
+
   const { data, error } = await supabase
     .from('rcv_world_examples')
     .update({
@@ -43,6 +56,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       ...(body.outcome !== undefined && { outcome: body.outcome }),
       ...(body.lessons !== undefined && { lessons: body.lessons }),
       ...(body.source_urls !== undefined && { source_urls: body.source_urls }),
+      ...content_types_update,
       ...(body.status !== undefined && { status: body.status }),
       updated_at: new Date().toISOString(),
     })
