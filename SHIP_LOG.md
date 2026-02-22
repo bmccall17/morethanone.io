@@ -2,6 +2,7 @@
 
 | version | title | date | summary |
 |---------|-------|------|---------|
+| [v0.0.10](devnotes/releases/v0.0.10.md) | admin test rounds & content polish | feb 22, 2026 | admin test rounds with `is_test` flag (invisible to analytics, public listings, metrics), dashboard quick-action buttons, host create `?test=1` param, /rcv-world & /faq nav polish, related items linking |
 | [v0.0.9](devnotes/releases/v0.0.9.md) | admin panel & RCV World article import | feb 22, 2026 | full admin panel (content CMS, FAQs, templates, playtest feedback, keepalive), RCV World tracker with Gemini-powered article import, Readability HTML extraction, import pipeline diagnostics |
 | [v0.0.8](devnotes/releases/v0.0.8.md) | analytics, sounds, metrics & run it again | feb 11, 2026 | sprint 7: analytics instrumentation (6 events + Vercel Analytics), drag sounds/haptics, admin metrics dashboard, server-side "run it again" replay with participant notification, poll templates, bot RNG improvement |
 | [v0.0.7](devnotes/releases/v0.0.7.md) | polish + safety | feb 11, 2026 | sprint 6: mobile drag-and-drop fix, host moderation (remove players/options), profanity filter, ranking timer, max ranks, fun name generator, 3-2-1 countdown reveal, reveal edge case fixes |
