@@ -28,22 +28,12 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="space-y-1">
-          <Link
-            href="/demo"
-            className="inline-block text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
-          >
-            See how it works &rarr;
-          </Link>
-          <div className="flex justify-center gap-4">
-            <Link href="/rcv-world" className="text-sm text-indigo-600 hover:text-indigo-700 transition-colors">
-              RCV around the world
-            </Link>
-            <Link href="/faq" className="text-sm text-indigo-600 hover:text-indigo-700 transition-colors">
-              FAQ
-            </Link>
-          </div>
-        </div>
+        <Link
+          href="/demo"
+          className="inline-block text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
+        >
+          See how it works &rarr;
+        </Link>
 
         <p className="text-xs text-gray-400">
           Rank your options. Watch them converge.

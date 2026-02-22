@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import RelatedLinks from '@/components/ui/RelatedLinks'
@@ -78,6 +79,14 @@ export default function RCVWorldPage() {
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
       <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex items-center justify-between text-sm">
+          <Link href="/demo" className="text-gray-400 hover:text-gray-600 transition-colors">&larr; Demo</Link>
+          <div className="flex gap-4">
+            <Link href="/faq" className="text-indigo-600 hover:text-indigo-700 transition-colors">FAQ</Link>
+            <Link href="/join" className="text-indigo-600 hover:text-indigo-700 transition-colors">Join a round</Link>
+          </div>
+        </div>
+
         <div>
           <h1 className="text-2xl font-bold text-gray-900">RCV Around the World</h1>
           <p className="text-gray-500 mt-1">Real examples of ranked choice voting in action.</p>

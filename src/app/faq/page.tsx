@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import RelatedLinks from '@/components/ui/RelatedLinks'
 import type { RelatedItem } from '@/lib/related-items'
@@ -59,6 +60,14 @@ export default function FAQPage() {
   return (
     <main className="min-h-screen px-4 py-8 sm:py-16">
       <div className="max-w-2xl mx-auto space-y-8">
+        <div className="flex items-center justify-between text-sm">
+          <Link href="/demo" className="text-gray-400 hover:text-gray-600 transition-colors">&larr; Demo</Link>
+          <div className="flex gap-4">
+            <Link href="/rcv-world" className="text-indigo-600 hover:text-indigo-700 transition-colors">RCV World</Link>
+            <Link href="/join" className="text-indigo-600 hover:text-indigo-700 transition-colors">Join a round</Link>
+          </div>
+        </div>
+
         <h1 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h1>
 
         {categories.map(category => (
