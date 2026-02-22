@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Find the round
     const { data: round, error: roundError } = await supabase
       .from('rounds')
-      .select('id, status')
+      .select('id, status, is_test')
       .eq('join_code', code.toUpperCase())
       .single()
 
@@ -49,9 +49,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: participantError.message }, { status: 500 })
     }
 
-    const ua = request.headers.get('user-agent') || ''
-    const device = /Mobile|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop'
-    trackEvent(supabase, 'player_joined', { device }, round.id)
+    if (!round.is_test) {
+      const ua = request.headers.get('user-agent') || ''
+      const device = /Mobile|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop'
+      trackEvent(supabase, 'player_joined', { device }, round.id)
+    }
 
     return NextResponse.json({
       participantId: participant.id,

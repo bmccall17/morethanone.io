@@ -15,6 +15,7 @@ export async function GET(request: Request) {
   const { data: rounds } = await supabase
     .from('rounds')
     .select('id, prompt, status, settings, ranking_started_at, created_at')
+    .eq('is_test', false)
     .order('created_at', { ascending: false })
     .limit(500)
 

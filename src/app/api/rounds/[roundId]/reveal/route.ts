@@ -90,11 +90,13 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  trackEvent(supabase, 'results_revealed', {
-    rounds_count: result.rounds.length,
-    winner: result.winner,
-    tie_break_used: result.tie_breaks.length > 0,
-  }, roundId)
+  if (!round.is_test) {
+    trackEvent(supabase, 'results_revealed', {
+      rounds_count: result.rounds.length,
+      winner: result.winner,
+      tie_break_used: result.tie_breaks.length > 0,
+    }, roundId)
+  }
 
   return NextResponse.json(result)
 }

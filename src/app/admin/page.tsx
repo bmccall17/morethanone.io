@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAdminAuth } from '@/lib/useAdminAuth'
+import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import StatCard from '@/components/metrics/StatCard'
 import BarChart from '@/components/metrics/BarChart'
@@ -68,6 +69,22 @@ export default function AdminDashboard() {
     <main className="px-4 py-8 sm:py-16">
       <div className="max-w-5xl mx-auto space-y-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+
+        {/* Quick actions */}
+        <div className="flex gap-3">
+          <Link
+            href="/host/create?test=1"
+            className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-300 hover:bg-yellow-100 transition-colors"
+          >
+            Host test round
+          </Link>
+          <Link
+            href="/join"
+            className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors"
+          >
+            Join round
+          </Link>
+        </div>
 
         {/* Overview stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

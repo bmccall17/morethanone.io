@@ -8,6 +8,7 @@ export async function GET() {
     .from('rounds')
     .select('id, join_code, prompt, status, options, host_heartbeat_at, created_at')
     .eq('is_private', false)
+    .eq('is_test', false)
     .in('status', ['setup', 'ranking', 'revealed'])
     .order('created_at', { ascending: false })
     .limit(20)

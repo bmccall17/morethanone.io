@@ -15,7 +15,7 @@ function generateJoinCode(): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { prompt, description, options, settings, is_private } = body
+    const { prompt, description, options, settings, is_private, is_test } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         options,
         settings: settings || { allowTies: false, anonymousResults: false, host_as_participant: false, show_processing: false, bot_count: 0 },
         is_private: is_private || false,
+        is_test: is_test || false,
         status: 'setup',
         host_token: hostToken,
       })
@@ -51,13 +52,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const roundSettings = settings || {}
-    trackEvent(supabase, 'round_created', {
-      options_count: options.length,
-      max_ranks: roundSettings.max_ranks || null,
-      anonymous: roundSettings.anonymousResults || false,
-      timer: roundSettings.timer_minutes || null,
-    }, data.id)
+    if (!data.is_test) {
+      const roundSettings = settings || {}
+      trackEvent(supabase, 'round_created', {
+        options_count: options.length,
+        max_ranks: roundSettings.max_ranks || null,
+        anonymous: roundSettings.anonymousResults || false,
+        timer: roundSettings.timer_minutes || null,
+      }, data.id)
+    }
 
     return NextResponse.json({
       id: data.id,

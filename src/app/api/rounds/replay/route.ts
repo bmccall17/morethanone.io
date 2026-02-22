@@ -59,6 +59,7 @@ export async function POST(request: Request) {
         status: 'setup',
         host_token: newHostToken,
         previous_round_id: roundId,
+        is_test: original.is_test || false,
       })
       .select()
       .single()
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
           settings: original.settings,
           status: 'setup',
           host_token: newHostToken,
+          is_test: original.is_test || false,
         })
         .select()
         .single()
@@ -103,9 +105,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create round' }, { status: 500 })
     }
 
-    trackEvent(supabase, 'replay_created', {
-      previous_round_id: roundId,
-    }, newRound.id as string)
+    if (!original.is_test) {
+      trackEvent(supabase, 'replay_created', {
+        previous_round_id: roundId,
+      }, newRound.id as string)
+    }
 
     return NextResponse.json({
       id: newRound.id,

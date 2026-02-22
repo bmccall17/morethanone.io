@@ -21,7 +21,7 @@ export async function POST(
     // Verify round is in ranking status
     const { data: round, error: roundError } = await supabase
       .from('rounds')
-      .select('status, options, settings')
+      .select('status, options, settings, is_test')
       .eq('id', roundId)
       .single()
 
@@ -71,9 +71,11 @@ export async function POST(
       return NextResponse.json({ error: upsertError.message }, { status: 500 })
     }
 
-    trackEvent(supabase, 'ballot_submitted', {
-      ranks_count: ranking.length,
-    }, roundId)
+    if (!round.is_test) {
+      trackEvent(supabase, 'ballot_submitted', {
+        ranks_count: ranking.length,
+      }, roundId)
+    }
 
     return NextResponse.json({ success: true })
   } catch {

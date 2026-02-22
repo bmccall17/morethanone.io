@@ -17,7 +17,7 @@ export async function POST(
 
   const { data: round, error: roundError } = await supabase
     .from('rounds')
-    .select('id, status, host_token')
+    .select('id, status, host_token, is_test')
     .eq('id', roundId)
     .single()
 
@@ -42,15 +42,17 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Track analytics — get participant and ranking counts
-  const [{ count: playersJoined }, { count: ballotsSubmitted }] = await Promise.all([
-    supabase.from('participants').select('*', { count: 'exact', head: true }).eq('round_id', roundId).eq('removed', false),
-    supabase.from('rankings').select('*', { count: 'exact', head: true }).eq('round_id', roundId),
-  ])
-  trackEvent(supabase, 'round_closed', {
-    players_joined: playersJoined || 0,
-    ballots_submitted: ballotsSubmitted || 0,
-  }, roundId)
+  if (!round.is_test) {
+    // Track analytics — get participant and ranking counts
+    const [{ count: playersJoined }, { count: ballotsSubmitted }] = await Promise.all([
+      supabase.from('participants').select('*', { count: 'exact', head: true }).eq('round_id', roundId).eq('removed', false),
+      supabase.from('rankings').select('*', { count: 'exact', head: true }).eq('round_id', roundId),
+    ])
+    trackEvent(supabase, 'round_closed', {
+      players_joined: playersJoined || 0,
+      ballots_submitted: ballotsSubmitted || 0,
+    }, roundId)
+  }
 
   return NextResponse.json({ status: 'closed' })
 }

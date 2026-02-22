@@ -37,6 +37,7 @@ function CreateRoundForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const isTestRound = searchParams.get('test') === '1'
   const prefillPrompt = searchParams.get('prompt') || ''
   const prefillDescription = searchParams.get('description') || ''
   const prefillOptions = (() => {
@@ -58,7 +59,7 @@ function CreateRoundForm() {
 
   const [allowTies, setAllowTies] = useState(false)
   const [anonymousResults, setAnonymousResults] = useState(false)
-  const [isPrivate, setIsPrivate] = useState(false)
+  const [isPrivate, setIsPrivate] = useState(isTestRound)
   const [timerMinutes, setTimerMinutes] = useState('')
   const [maxRanks, setMaxRanks] = useState('')
   const [loading, setLoading] = useState(false)
@@ -86,6 +87,7 @@ function CreateRoundForm() {
           description: description.trim() || null,
           options,
           is_private: isPrivate,
+          is_test: isTestRound,
           settings: {
             allowTies,
             anonymousResults,
@@ -114,7 +116,14 @@ function CreateRoundForm() {
     <main className="min-h-screen px-4 py-8 sm:py-16">
       <div className="max-w-lg mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Create a round</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900">Create a round</h1>
+            {isTestRound && (
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300">
+                Test round
+              </span>
+            )}
+          </div>
           <p className="text-gray-500 mt-1">Set up a question and options for your group.</p>
         </div>
 
