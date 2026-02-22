@@ -5,6 +5,8 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import RelatedItemsPicker from '@/components/admin/RelatedItemsPicker'
+import type { RelatedItem } from '@/lib/related-items'
 
 interface ContentSection {
   id: string
@@ -13,6 +15,7 @@ interface ContentSection {
   body: string
   sort_order: number
   is_published: boolean
+  related_items: RelatedItem[]
 }
 
 export default function ContentAdminPage() {
@@ -116,6 +119,10 @@ export default function ContentAdminPage() {
                   />
                 </div>
                 <Input label="Sort order" type="number" value={String(draft.sort_order ?? s.sort_order)} onChange={e => setDraft({ ...draft, sort_order: Number(e.target.value) })} />
+                <RelatedItemsPicker
+                  items={(draft.related_items ?? s.related_items ?? []) as RelatedItem[]}
+                  onChange={items => setDraft({ ...draft, related_items: items as unknown as RelatedItem[] })}
+                />
                 <div className="flex gap-2">
                   <Button onClick={() => save(s.id)}>Save</Button>
                   <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>

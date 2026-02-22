@@ -9,7 +9,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data } = await supabase
       .from('content_sections')
-      .select('slug, title, body')
+      .select('slug, title, body, related_items')
       .eq('is_published', true)
       .order('sort_order', { ascending: true })
 

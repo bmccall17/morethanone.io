@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     let query = supabase
       .from('rcv_world_examples')
-      .select('id, title, location, region, event_date, category, content_types, description, outcome, lessons, source_urls')
+      .select('id, title, location, region, event_date, category, content_types, description, outcome, lessons, source_urls, related_items')
       .eq('status', 'published')
       .order('event_date', { ascending: false })
 

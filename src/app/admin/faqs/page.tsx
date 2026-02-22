@@ -5,6 +5,8 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import RelatedItemsPicker from '@/components/admin/RelatedItemsPicker'
+import type { RelatedItem } from '@/lib/related-items'
 
 interface FAQ {
   id: string
@@ -13,6 +15,7 @@ interface FAQ {
   category: string
   sort_order: number
   is_published: boolean
+  related_items: RelatedItem[]
 }
 
 export default function FAQsAdminPage() {
@@ -116,6 +119,10 @@ export default function FAQsAdminPage() {
                 </div>
                 <Input label="Category" value={draft.category ?? f.category} onChange={e => setDraft({ ...draft, category: e.target.value })} />
                 <Input label="Sort order" type="number" value={String(draft.sort_order ?? f.sort_order)} onChange={e => setDraft({ ...draft, sort_order: Number(e.target.value) })} />
+                <RelatedItemsPicker
+                  items={draft.related_items ?? f.related_items ?? []}
+                  onChange={items => setDraft({ ...draft, related_items: items })}
+                />
                 <div className="flex gap-2">
                   <Button onClick={() => save(f.id)}>Save</Button>
                   <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>

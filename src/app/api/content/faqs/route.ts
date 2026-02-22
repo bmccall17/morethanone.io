@@ -6,7 +6,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data, error } = await supabase
       .from('faqs')
-      .select('id, question, answer, category')
+      .select('id, question, answer, category, related_items')
       .eq('is_published', true)
       .order('sort_order', { ascending: true })
 

@@ -159,6 +159,28 @@ export default function DemoPage() {
             />
           </div>
         </div>
+
+        {/* Learn More */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link href="/rcv-world" className="block">
+            <Card className="hover:border-indigo-300 transition-colors h-full">
+              <h3 className="text-sm font-semibold text-indigo-600">RCV Around the World</h3>
+              <p className="text-xs text-gray-500 mt-1">Real examples of ranked choice voting in action.</p>
+            </Card>
+          </Link>
+          <Link href="/faq" className="block">
+            <Card className="hover:border-indigo-300 transition-colors h-full">
+              <h3 className="text-sm font-semibold text-indigo-600">Frequently Asked Questions</h3>
+              <p className="text-xs text-gray-500 mt-1">How RCV works and why it matters.</p>
+            </Card>
+          </Link>
+          <Link href="/join" className="block">
+            <Card className="hover:border-indigo-300 transition-colors h-full">
+              <h3 className="text-sm font-semibold text-indigo-600">Try It Live</h3>
+              <p className="text-xs text-gray-500 mt-1">Join or host a round and see convergence in action.</p>
+            </Card>
+          </Link>
+        </div>
       </div>
     </main>
   )

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import RelatedLinks from '@/components/ui/RelatedLinks'
+import type { RelatedItem } from '@/lib/related-items'
 
 interface RCVExample {
   id: string
@@ -16,6 +18,7 @@ interface RCVExample {
   outcome: string
   lessons: string
   source_urls: string[]
+  related_items: RelatedItem[]
 }
 
 const CATEGORIES = ['all', 'election', 'referendum', 'community', 'corporate', 'other']
@@ -184,6 +187,7 @@ export default function RCVWorldPage() {
                         </div>
                       </div>
                     )}
+                    <RelatedLinks items={ex.related_items} />
                   </div>
                 )}
               </Card>

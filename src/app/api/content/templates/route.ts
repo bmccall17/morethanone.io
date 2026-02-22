@@ -6,7 +6,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data, error } = await supabase
       .from('templates')
-      .select('name, prompt, options')
+      .select('name, prompt, options, related_items')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
 

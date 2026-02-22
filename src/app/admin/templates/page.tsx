@@ -5,6 +5,8 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import RelatedItemsPicker from '@/components/admin/RelatedItemsPicker'
+import type { RelatedItem } from '@/lib/related-items'
 
 interface Template {
   id: string
@@ -14,6 +16,7 @@ interface Template {
   category: string
   is_active: boolean
   sort_order: number
+  related_items: RelatedItem[]
 }
 
 export default function TemplatesAdminPage() {
@@ -125,6 +128,10 @@ export default function TemplatesAdminPage() {
                 </div>
                 <Input label="Category" value={(draft.category ?? t.category)} onChange={e => setDraft({ ...draft, category: e.target.value })} />
                 <Input label="Sort order" type="number" value={String(draft.sort_order ?? t.sort_order)} onChange={e => setDraft({ ...draft, sort_order: Number(e.target.value) })} />
+                <RelatedItemsPicker
+                  items={(draft.related_items ?? t.related_items ?? []) as RelatedItem[]}
+                  onChange={items => setDraft({ ...draft, related_items: items as unknown as RelatedItem[] })}
+                />
                 <div className="flex gap-2">
                   <Button onClick={() => save(t.id)}>Save</Button>
                   <Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button>

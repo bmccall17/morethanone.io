@@ -6,6 +6,8 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import RelatedItemsPicker from '@/components/admin/RelatedItemsPicker'
+import type { RelatedItem } from '@/lib/related-items'
 
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
 const CONTENT_TYPES = ['example', 'resource', 'news'] as const
@@ -30,6 +32,7 @@ export default function NewRCVWorldPage() {
     source_urls_text: '',
     status: 'draft' as string,
   })
+  const [relatedItems, setRelatedItems] = useState<RelatedItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -142,6 +145,7 @@ export default function NewRCVWorldPage() {
         outcome: form.outcome,
         lessons: form.lessons,
         source_urls,
+        related_items: relatedItems,
         status: form.status,
       }),
     })
@@ -308,6 +312,7 @@ export default function NewRCVWorldPage() {
                 placeholder="https://example.com/article"
               />
             </div>
+            <RelatedItemsPicker items={relatedItems} onChange={setRelatedItems} />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select

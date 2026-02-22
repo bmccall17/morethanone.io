@@ -82,6 +82,7 @@ create table if not exists content_sections (
   body text not null default '',
   sort_order integer not null default 0,
   is_published boolean not null default true,
+  related_items jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -95,6 +96,7 @@ create table if not exists templates (
   category text not null default 'general',
   is_active boolean not null default true,
   sort_order integer not null default 0,
+  related_items jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -107,6 +109,7 @@ create table if not exists faqs (
   category text not null default 'general',
   sort_order integer not null default 0,
   is_published boolean not null default false,
+  related_items jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -136,6 +139,7 @@ create table if not exists rcv_world_examples (
   lessons text not null default '',
   source_urls jsonb not null default '[]'::jsonb,
   content_types jsonb not null default '["example"]'::jsonb,
+  related_items jsonb not null default '[]'::jsonb,
   status text not null default 'draft' check (status in ('draft', 'published')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

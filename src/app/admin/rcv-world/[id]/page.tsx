@@ -6,6 +6,8 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import RelatedItemsPicker from '@/components/admin/RelatedItemsPicker'
+import type { RelatedItem } from '@/lib/related-items'
 
 const CATEGORIES = ['election', 'referendum', 'community', 'corporate', 'other']
 const CONTENT_TYPES = ['example', 'resource', 'news'] as const
@@ -22,6 +24,7 @@ interface RCVExample {
   outcome: string
   lessons: string
   source_urls: string[]
+  related_items: RelatedItem[]
   status: string
 }
 
@@ -42,6 +45,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
     source_urls_text: '',
     status: 'draft',
   })
+  const [relatedItems, setRelatedItems] = useState<RelatedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -63,6 +67,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
           source_urls_text: (data.source_urls || []).join('\n'),
           status: data.status,
         })
+        setRelatedItems(Array.isArray(data.related_items) ? data.related_items : [])
         setLoading(false)
       })
       .catch(() => { setError('Failed to load'); setLoading(false) })
@@ -91,6 +96,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
         outcome: form.outcome,
         lessons: form.lessons,
         source_urls,
+        related_items: relatedItems,
         status: form.status,
       }),
     })
@@ -191,6 +197,7 @@ export default function EditRCVWorldPage({ params }: { params: Promise<{ id: str
                 onChange={set('source_urls_text')}
               />
             </div>
+            <RelatedItemsPicker items={relatedItems} onChange={setRelatedItems} />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select

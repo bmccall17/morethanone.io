@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyAdminAuth } from '@/lib/admin-auth'
+import { validateRelatedItems } from '@/lib/related-items'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!verifyAdminAuth(request)) {
@@ -39,6 +40,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       ...(body.body !== undefined && { body: body.body }),
       ...(body.sort_order !== undefined && { sort_order: body.sort_order }),
       ...(body.is_published !== undefined && { is_published: body.is_published }),
+      ...(body.related_items !== undefined && { related_items: validateRelatedItems(body.related_items) }),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)

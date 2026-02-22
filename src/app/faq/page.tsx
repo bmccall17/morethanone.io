@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Card from '@/components/ui/Card'
+import RelatedLinks from '@/components/ui/RelatedLinks'
+import type { RelatedItem } from '@/lib/related-items'
 
 interface FAQ {
   id: string
   question: string
   answer: string
   category: string
+  related_items: RelatedItem[]
 }
 
 export default function FAQPage() {
@@ -78,8 +81,11 @@ export default function FAQPage() {
                       </span>
                     </button>
                     {expanded.has(f.id) && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 whitespace-pre-wrap">
-                        {f.answer}
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="text-sm text-gray-600 whitespace-pre-wrap">
+                          {f.answer}
+                        </div>
+                        <RelatedLinks items={f.related_items} />
                       </div>
                     )}
                   </Card>
