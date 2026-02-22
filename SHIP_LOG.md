@@ -2,6 +2,7 @@
 
 | version | title | date | summary |
 |---------|-------|------|---------|
+| [v0.0.9](devnotes/releases/v0.0.9.md) | admin panel & RCV World article import | feb 22, 2026 | full admin panel (content CMS, FAQs, templates, playtest feedback, keepalive), RCV World tracker with Gemini-powered article import, Readability HTML extraction, import pipeline diagnostics |
 | [v0.0.8](devnotes/releases/v0.0.8.md) | analytics, sounds, metrics & run it again | feb 11, 2026 | sprint 7: analytics instrumentation (6 events + Vercel Analytics), drag sounds/haptics, admin metrics dashboard, server-side "run it again" replay with participant notification, poll templates, bot RNG improvement |
 | [v0.0.7](devnotes/releases/v0.0.7.md) | polish + safety | feb 11, 2026 | sprint 6: mobile drag-and-drop fix, host moderation (remove players/options), profanity filter, ranking timer, max ranks, fun name generator, 3-2-1 countdown reveal, reveal edge case fixes |
 | [v0.0.6](devnotes/releases/v0.0.6.md) | tiered option distinguishability + processing polish | feb 10, 2026 | 8-color palette with 3-tier pattern/shape system (24 unique combos), shared processing view, bot voters, polling fallback, step button, cross-panel color consistency |
