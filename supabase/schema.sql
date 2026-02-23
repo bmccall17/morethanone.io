@@ -153,6 +153,35 @@ create table if not exists keepalive_log (
   status text not null default 'ok'
 );
 
+-- usage_log: track Gemini API and function usage for cost monitoring
+create table if not exists usage_log (
+  id uuid primary key default gen_random_uuid(),
+  category text not null check (category in ('gemini', 'function')),
+  action text not null,
+  tokens_in integer,
+  tokens_out integer,
+  tokens_total integer,
+  duration_ms integer,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_usage_log_category on usage_log (category);
+create index if not exists idx_usage_log_created_at on usage_log (created_at);
+
+-- RPC: get public table sizes for usage monitoring
+create or replace function get_table_sizes()
+returns table(name text, bytes bigint)
+language sql
+security definer
+as $$
+  select c.relname::text as name,
+         pg_total_relation_size(c.oid) as bytes
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind = 'r'
+  order by bytes desc;
+$$;
+
 -- enable realtime (prep for sprint 2)
 alter publication supabase_realtime add table rounds;
 alter publication supabase_realtime add table participants;

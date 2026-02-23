@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import StatCard from '@/components/metrics/StatCard'
 import BarChart from '@/components/metrics/BarChart'
+import UsagePanel from '@/components/metrics/UsagePanel'
 
 interface Metrics {
   overview: {
@@ -163,6 +164,9 @@ export default function AdminDashboard() {
             </table>
           </div>
         </Card>
+
+        {/* Usage & Costs */}
+        <UsagePanel fetcher={fetcher} />
       </div>
     </main>
   )

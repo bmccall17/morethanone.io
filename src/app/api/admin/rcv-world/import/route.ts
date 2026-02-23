@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { verifyAdminAuth } from '@/lib/admin-auth'
 import { extractMetadata, htmlToText } from '@/lib/html-to-text'
+import { createClient } from '@/lib/supabase/server'
+import { logUsage } from '@/lib/usage'
 
 export const maxDuration = 30
 
@@ -130,6 +132,20 @@ export async function POST(request: Request) {
 
       if (geminiRes.ok) {
         const geminiData = await geminiRes.json()
+
+        // Log Gemini token usage (fire-and-forget)
+        const usage = geminiData.usageMetadata
+        if (usage) {
+          createClient().then(supabase =>
+            logUsage(supabase, 'gemini', 'import_article', {
+              tokens_in: usage.promptTokenCount ?? undefined,
+              tokens_out: usage.candidatesTokenCount ?? undefined,
+              tokens_total: usage.totalTokenCount ?? undefined,
+              metadata: { model: 'gemini-2.5-flash', url },
+            })
+          )
+        }
+
         const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text
         diag.geminiRawText = text?.slice(0, 500) || null
 
