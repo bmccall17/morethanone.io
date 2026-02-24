@@ -189,9 +189,56 @@ const maine2018: DemoScenario = {
   teachableMoment: 'This demo mirrors the real 2018 Maine election — the first U.S. House race ever decided by ranked choice voting. Republican Bruce Poliquin led on first-choice votes, but Democrat Jared Golden won after independent voters\' second preferences were counted. It proved that in a close race, broad appeal across the full electorate matters more than a narrow first-choice lead.',
 }
 
+/**
+ * Scenario 5: Alaska 2022 — Palin's Name Recognition Wasn't Enough
+ *
+ * Based on the real Alaska special election of August 2022.
+ * Peltola (D) 40%, Palin (R) 31%, Begich (R) 29% in round 1.
+ * When Begich eliminated: 50% transferred to Palin, 29% to Peltola, 21% exhausted.
+ * Peltola won 51.5% to 48.5%.
+ *
+ * Scaled to 16 voters:
+ * Peltola 7, Palin 5, Begich 4.
+ * Of 4 Begich voters: 2 → Palin, 1 → Peltola, 1 exhausted.
+ * Final: Peltola 8, Palin 7, 1 inactive → threshold 8 → Peltola wins.
+ */
+const alaska2022: DemoScenario = {
+  name: 'Alaska 2022: Palin\'s Name Wasn\'t Enough',
+  description: 'Based on the real 2022 Alaska special election. Republican Sarah Palin had the biggest name in the race, but Democrat Mary Peltola won by earning second-choice support from the other Republican\'s voters.',
+  options: ['Peltola', 'Palin', 'Begich'],
+  participants: [
+    'Raven', 'Spruce', 'Timber', 'Denali', 'Willow',
+    'Kodiak', 'Juneau', 'Sitka', 'Kiska', 'Tundra',
+    'Aurora', 'Glacier', 'Summit', 'Birch', 'Inlet', 'Orca',
+  ],
+  ballots: [
+    // Peltola-first voters (7) — some rank Begich, a few rank Palin low
+    ['Peltola', 'Begich', 'Palin'],
+    ['Peltola', 'Begich'],
+    ['Peltola'],
+    ['Peltola', 'Begich', 'Palin'],
+    ['Peltola'],
+    ['Peltola', 'Begich'],
+    ['Peltola', 'Palin'],
+    // Palin-first voters (5) — loyal base, some rank Begich
+    ['Palin', 'Begich', 'Peltola'],
+    ['Palin', 'Begich'],
+    ['Palin'],
+    ['Palin', 'Begich', 'Peltola'],
+    ['Palin'],
+    // Begich-first voters (4) — split transfers: 2 Palin, 1 Peltola, 1 exhausted
+    ['Begich', 'Palin', 'Peltola'],
+    ['Begich', 'Palin'],
+    ['Begich', 'Peltola', 'Palin'],
+    ['Begich'],
+  ],
+  teachableMoment: 'This demo mirrors the real 2022 Alaska special election. Sarah Palin had the most famous name in the race, but Mary Peltola won by earning broader support. When fellow Republican Begich was eliminated, enough of his voters crossed party lines to give Peltola the majority. Name recognition and a loyal base weren\'t enough — the winner needed support beyond her own camp.',
+}
+
 export const scenarios: DemoScenario[] = [
   earlyLeaderLateOvertake,
   polarizingVsConsensus,
   comebackFromThird,
   maine2018,
+  alaska2022,
 ]
