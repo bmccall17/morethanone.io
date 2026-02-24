@@ -142,8 +142,56 @@ const comebackFromThird: DemoScenario = {
   teachableMoment: 'Highlights how layered preferences matter more than top-line position. C was rarely anyone\'s first choice, but was nearly everyone\'s second or third — making it the true consensus.',
 }
 
+/**
+ * Scenario 4: Maine 2018 — First U.S. House Race Decided by Ranked Choice
+ *
+ * Based on the real Maine 2nd Congressional District election of November 2018.
+ * Poliquin (R) led Golden (D) on first-choice votes 46% to 45%.
+ * Two independents (Bond, Hoar) were eliminated.
+ * ~44% of their support transferred to Golden, ~20% to Poliquin, ~35% exhausted.
+ * Golden overtook Poliquin 50.6% to 49.4%.
+ *
+ * Scaled to 16 voters with proportionally accurate distributions:
+ * Poliquin 7, Golden 7, Bond 1, Hoar 1.
+ * Both independents' second preferences favor Golden → Golden wins.
+ */
+const maine2018: DemoScenario = {
+  name: 'Maine 2018: The Race That Made History',
+  description: 'Based on the real 2018 Maine congressional election — the first U.S. House race ever decided by ranked choice. Republican Poliquin led Democrat Golden after the first count, but independent voters\' second choices changed the outcome.',
+  options: ['Poliquin', 'Golden', 'Bond', 'Hoar'],
+  participants: [
+    'Abigail', 'Ben', 'Caleb', 'Donna', 'Earl',
+    'Fiona', 'George', 'Helen', 'Isaac', 'Janet',
+    'Keith', 'Linda', 'Mike', 'Nancy', 'Owen', 'Pam',
+  ],
+  ballots: [
+    // Poliquin-first voters (7) — some rank Golden low or not at all
+    ['Poliquin', 'Bond', 'Golden'],
+    ['Poliquin', 'Golden'],
+    ['Poliquin'],
+    ['Poliquin', 'Bond'],
+    ['Poliquin', 'Golden', 'Bond'],
+    ['Poliquin'],
+    ['Poliquin', 'Bond', 'Golden', 'Hoar'],
+    // Golden-first voters (7) — some rank Bond second
+    ['Golden', 'Bond', 'Poliquin'],
+    ['Golden', 'Bond'],
+    ['Golden'],
+    ['Golden', 'Poliquin'],
+    ['Golden', 'Bond', 'Hoar'],
+    ['Golden', 'Hoar', 'Bond'],
+    ['Golden', 'Bond', 'Poliquin', 'Hoar'],
+    // Bond-first voter (1) — second choice Golden (matches real transfer pattern)
+    ['Bond', 'Golden', 'Poliquin', 'Hoar'],
+    // Hoar-first voter (1) — second choice Golden
+    ['Hoar', 'Golden', 'Bond', 'Poliquin'],
+  ],
+  teachableMoment: 'This demo mirrors the real 2018 Maine election — the first U.S. House race ever decided by ranked choice voting. Republican Bruce Poliquin led on first-choice votes, but Democrat Jared Golden won after independent voters\' second preferences were counted. It proved that in a close race, broad appeal across the full electorate matters more than a narrow first-choice lead.',
+}
+
 export const scenarios: DemoScenario[] = [
   earlyLeaderLateOvertake,
   polarizingVsConsensus,
   comebackFromThird,
+  maine2018,
 ]
