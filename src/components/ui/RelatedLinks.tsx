@@ -7,6 +7,7 @@ function itemHref(item: RelatedItem): string | null {
     case 'faq': return '/faq'
     case 'rcv_world': return '/rcv-world'
     case 'content_section': return '/demo'
+    case 'demo': return `/demo?scenario=${item.id}`
     case 'template': return null
   }
 }
@@ -17,6 +18,7 @@ const TYPE_LABELS: Record<string, string> = {
   rcv_world: 'RCV World',
   template: 'Template',
   content_section: 'About',
+  demo: 'Demo',
 }
 
 export default function RelatedLinks({ items }: { items: RelatedItem[] }) {

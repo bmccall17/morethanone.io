@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -11,10 +12,24 @@ import SelectionGridView from '@/components/reveal/SelectionGridView'
 import { DemoRunner } from '@/lib/demo/engine'
 import { scenarios } from '@/lib/demo/scenarios'
 
-export default function DemoPage() {
-  const [scenarioIndex, setScenarioIndex] = useState(0)
+function DemoContent() {
+  const searchParams = useSearchParams()
+  const scenarioParam = searchParams.get('scenario')
+  const initialIndex = scenarioParam !== null
+    ? Math.min(Math.max(0, Number(scenarioParam)), scenarios.length - 1)
+    : 0
+  const [scenarioIndex, setScenarioIndex] = useState(initialIndex)
   const [roundNumber, setRoundNumber] = useState(1)
   const [showExplanations, setShowExplanations] = useState(false)
+
+  // Sync with URL param changes
+  useEffect(() => {
+    if (scenarioParam !== null) {
+      const idx = Math.min(Math.max(0, Number(scenarioParam)), scenarios.length - 1)
+      setScenarioIndex(idx)
+      setRoundNumber(1)
+    }
+  }, [scenarioParam])
 
   const scenario = scenarios[scenarioIndex]
 
@@ -22,7 +37,6 @@ export default function DemoPage() {
 
   const totalRounds = runner.totalRounds()
   const explanation = showExplanations ? runner.getExplanation(roundNumber) : ''
-  const roundsUpToCurrent = runner.getRound(roundNumber)
 
   function handleScenarioChange(index: number) {
     setScenarioIndex(index)
@@ -145,6 +159,21 @@ export default function DemoPage() {
               <Card padding="sm" className="bg-amber-50 border-amber-100">
                 <p className="text-xs font-medium text-amber-700 mb-1">Takeaway</p>
                 <p className="text-sm text-amber-900 leading-relaxed">{scenario.teachableMoment}</p>
+                {scenario.relatedLinks && scenario.relatedLinks.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-amber-200">
+                    <div className="flex flex-wrap gap-2">
+                      {scenario.relatedLinks.map(link => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-xs text-amber-800 hover:bg-amber-200 transition-colors"
+                        >
+                          {link.label} &rarr;
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
           </div>
@@ -183,5 +212,13 @@ export default function DemoPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function DemoPage() {
+  return (
+    <Suspense>
+      <DemoContent />
+    </Suspense>
   )
 }

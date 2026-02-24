@@ -1,3 +1,8 @@
+export interface DemoRelatedLink {
+  label: string
+  href: string
+}
+
 export interface DemoScenario {
   name: string
   description: string
@@ -5,6 +10,7 @@ export interface DemoScenario {
   ballots: string[][]
   participants: string[]
   teachableMoment: string
+  relatedLinks?: DemoRelatedLink[]
 }
 
 /**
@@ -233,6 +239,9 @@ const maine2018: DemoScenario = {
     ['Hoar'],                                  // Lewiston — protest vote, no backup ranked
   ],
   teachableMoment: 'This demo mirrors the real 2018 Maine election — the first U.S. congressional race ever decided by ranked choice voting. Of 289,624 ballots, Poliquin led Golden by 2,171 votes on first count. But when Bond and Hoar were eliminated, Golden gained 10,232 transfer votes to Poliquin\'s 4,695 — flipping the result. 8,253 ballots exhausted. Final: Golden 50.6%, Poliquin 49.4%.',
+  relatedLinks: [
+    { label: 'Read the full story in RCV World', href: '/rcv-world' },
+  ],
 }
 
 /**
@@ -320,6 +329,9 @@ const alaska2022: DemoScenario = {
     ['Begich'],                        // Wrangell-Petersburg — small Southeast Alaska fishing community; backed Begich as a moderate Republican but declined to rank Palin or Peltola, reflecting the 21% of Begich voters whose ballots exhausted in the real election
   ],
   teachableMoment: 'This demo mirrors the real 2022 Alaska special election. Of 188,582 ballots, Peltola led but two Republicans held a combined 60%. When Begich was eliminated, 27,053 of his votes went to Palin but 15,467 crossed party lines to Peltola — and 11,243 exhausted. That cross-party second-choice support gave Peltola the majority: 51.5% to 48.5%. Palin\'s famous name and loyal base weren\'t enough without broader appeal.',
+  relatedLinks: [
+    { label: 'Read the full story in RCV World', href: '/rcv-world' },
+  ],
 }
 
 export const scenarios: DemoScenario[] = [

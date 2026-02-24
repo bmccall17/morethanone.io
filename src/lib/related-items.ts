@@ -1,4 +1,4 @@
-const VALID_TYPES = ['round', 'faq', 'rcv_world', 'template', 'content_section'] as const
+const VALID_TYPES = ['round', 'faq', 'rcv_world', 'template', 'content_section', 'demo'] as const
 
 export type RelatedItemType = typeof VALID_TYPES[number]
 
