@@ -192,8 +192,8 @@ const maine2018: DemoScenario = {
     'Hancock N.',    // northern Hancock, Golden
     'Somerset W.',   // western Somerset, Poliquin
     'Penobscot W.',  // western Penobscot, split
-    'Bond voters',   // independent Bond supporters
-    'Hoar voters',   // independent Hoar supporters
+    'Orono',         // college town (UMaine), independent-leaning
+    'Lewiston',      // Androscoggin's largest city, working-class independent streak
   ],
   ballots: [
     // Poliquin-first ballots (11 of 24 = 45.8%, real: 46.3%)
@@ -222,10 +222,15 @@ const maine2018: DemoScenario = {
     ['Golden', 'Poliquin', 'Bond', 'Hoar'],   // Kennebec S. — moderate
     ['Golden', 'Bond', 'Poliquin'],            // Penobscot W. — split area
     // Bond-first ballot (1 of 24 = 4.2%, real: 5.7%)
+    // Orono (UMaine area) — college-town independents backed Bond's fiscal
+    // conservatism + social moderation; Golden was the natural 2nd choice
     // Real transfer: 44.5% → Golden, 20.3% → Poliquin, 35.2% exhausted
-    ['Bond', 'Golden', 'Poliquin', 'Hoar'],   // Bond voters — 2nd choice Golden
+    ['Bond', 'Golden', 'Poliquin', 'Hoar'],   // Orono — independent, 2nd choice Golden
     // Hoar-first ballot (1 of 24 = 4.2%, real: 2.4%)
-    ['Hoar'],                                  // Hoar voters — exhausted (no 2nd pref)
+    // Lewiston — working-class voters drawn to Hoar's outsider message;
+    // many didn't engage with other candidates, reflecting the 35% of
+    // independent voters whose ballots exhausted in the real election
+    ['Hoar'],                                  // Lewiston — protest vote, no backup ranked
   ],
   teachableMoment: 'This demo mirrors the real 2018 Maine election — the first U.S. congressional race ever decided by ranked choice voting. Of 289,624 ballots, Poliquin led Golden by 2,171 votes on first count. But when Bond and Hoar were eliminated, Golden gained 10,232 transfer votes to Poliquin\'s 4,695 — flipping the result. 8,253 ballots exhausted. Final: Golden 50.6%, Poliquin 49.4%.',
 }
@@ -287,20 +292,20 @@ const alaska2022: DemoScenario = {
     // Peltola-first ballots (10 of 24 = 41.7%, real: 40.2%)
     ['Peltola', 'Begich', 'Palin'],   // Juneau — moderate D, open to Begich
     ['Peltola', 'Begich'],             // Bethel — strong Peltola
-    ['Peltola'],                       // Nome — strong Peltola, no backup
+    ['Peltola'],                       // Nome — Bering Strait region, Alaska Native communities; Peltola was the clear choice with no interest in Republican alternatives
     ['Peltola', 'Begich', 'Palin'],   // Sitka — moderate D
-    ['Peltola'],                       // North Slope — strong Peltola
+    ['Peltola'],                       // North Slope — Iñupiat communities on the Arctic coast; strong single-candidate loyalty to Peltola
     ['Peltola', 'Begich'],             // Dillingham — Alaska Native area
     ['Peltola', 'Begich', 'Palin'],   // Anchorage W. — diverse, ranked all
-    ['Peltola'],                       // Bethel S. — rural, strong Peltola
+    ['Peltola'],                       // Bethel S. — rural Yup'ik villages in the Kuskokwim Delta; Peltola's home region
     ['Peltola', 'Begich'],             // Aleutians — remote, Peltola
-    ['Peltola'],                       // Yukon-Koyukuk — strong Peltola
+    ['Peltola'],                       // Yukon-Koyukuk — remote Alaska Native villages along the Yukon River; Peltola (Yup'ik) had deep community ties here and neither Republican campaigned in the region, so voters had no reason to rank alternatives
     // Palin-first ballots (8 of 24 = 33.3%, real: 31.3%)
     ['Palin', 'Begich', 'Peltola'],   // Mat-Su Valley — strong Palin
     ['Palin', 'Begich'],               // Kenai Peninsula — Palin lean
-    ['Palin'],                         // Mat-Su N. — strong Palin, bullet vote
+    ['Palin'],                         // Mat-Su N. — Palin's home turf (Wasilla); loyal base with no interest in ranking other candidates
     ['Palin', 'Begich', 'Peltola'],   // Ketchikan — leans R
-    ['Palin'],                         // Kenai S. — Palin lean, no backup
+    ['Palin'],                         // Kenai S. — rural Kenai Peninsula; conservative voters loyal to Palin who didn't rank a backup
     ['Palin', 'Begich'],               // Fairbanks N. — moderate R
     ['Palin', 'Begich', 'Peltola'],   // Denali — small, ranked all
     ['Palin', 'Begich'],               // Valdez-Cordova — R lean, Palin first
@@ -312,7 +317,7 @@ const alaska2022: DemoScenario = {
     ['Begich', 'Peltola', 'Palin'],   // Anchorage E. — Begich home turf, crossed over
     ['Begich', 'Palin', 'Peltola'],   // Fairbanks — moderate, Palin 2nd
     ['Begich', 'Peltola'],             // Kodiak Island — mixed, crossed over
-    ['Begich'],                        // Wrangell-Petersburg — small, exhausted
+    ['Begich'],                        // Wrangell-Petersburg — small Southeast Alaska fishing community; backed Begich as a moderate Republican but declined to rank Palin or Peltola, reflecting the 21% of Begich voters whose ballots exhausted in the real election
   ],
   teachableMoment: 'This demo mirrors the real 2022 Alaska special election. Of 188,582 ballots, Peltola led but two Republicans held a combined 60%. When Begich was eliminated, 27,053 of his votes went to Palin but 15,467 crossed party lines to Peltola — and 11,243 exhausted. That cross-party second-choice support gave Peltola the majority: 51.5% to 48.5%. Palin\'s famous name and loyal base weren\'t enough without broader appeal.',
 }
