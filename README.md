@@ -34,7 +34,7 @@ the processing engine is deterministic and fully tested. tie-breaking uses a thr
 
 a built-in demo mode lets hosts walk through three pre-scripted scenarios step by step, with optional plain-language explanations at each round. this is useful for teaching the process to a new audience before running a live session.
 
-an extensive admin panel tracks metrics (completion rates, convergence speed, tie-break frequency, API costs, and usage patterns), alongside a full content CMS supporting FAQs, templates, playtest feedback, and an AI-assisted RCV World example tracker.
+an extensive admin panel tracks metrics (completion rates, convergence speed, tie-break frequency, and usage patterns), alongside a full content CMS supporting FAQs, templates, playtest feedback, and an AI-assisted RCV World example tracker.
 
 ## tech stack
 the app is built with Next.js 16 (app router), TypeScript, React 19, and Tailwind CSS v4. the backend uses Supabase for Postgres storage and realtime subscriptions. drag-and-drop ranking uses @dnd-kit. QR codes are generated with the qrcode library. analytics run through Vercel Analytics and a custom events table. deployment targets Vercel.
