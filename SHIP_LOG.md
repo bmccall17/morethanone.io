@@ -2,6 +2,7 @@
 
 | version | title | date | summary |
 |---------|-------|------|---------|
+| [v0.0.12](devnotes/releases/v0.0.12.md) | real election demos + nav polish + security hardening | mar 11, 2026 | real-world election scenarios (Maine 2018, Alaska 2022), unified LearnNav across demo/FAQ/RCV World, RLS policies for rcv_world_examples, service-role admin client, keepalive fixes |
 | [v0.0.11](devnotes/releases/v0.0.11.md) | usage metrics on admin dashboard | feb 23, 2026 | Usage & Costs section on admin dashboard: Gemini API token tracking, function activity via events proxy, Supabase DB size monitoring against 500MB Hobby limit |
 | [v0.0.10](devnotes/releases/v0.0.10.md) | admin test rounds & content polish | feb 22, 2026 | admin test rounds with `is_test` flag (invisible to analytics, public listings, metrics), dashboard quick-action buttons, host create `?test=1` param, /rcv-world & /faq nav polish, related items linking |
 | [v0.0.9](devnotes/releases/v0.0.9.md) | admin panel & RCV World article import | feb 22, 2026 | full admin panel (content CMS, FAQs, templates, playtest feedback, keepalive), RCV World tracker with Gemini-powered article import, Readability HTML extraction, import pipeline diagnostics |
